@@ -1,595 +1,2299 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BornoBondhu52 - Intelligent Bangla Checker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .bangla-font { font-family: 'Noto Serif Bengali', serif; }
-        
-        /* Fluent Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BORNO.AI — Linguistic Database</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Serif+Bengali:wght@300;400;700&display=swap" rel="stylesheet">
+<!-- FontAwesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg: #0e0c0b;
+    --surface: rgba(255,255,255,0.04);
+    --surface-hover: rgba(255,255,255,0.07);
+    --border: rgba(255,255,255,0.08);
+    --accent: #d4541a;
+    --accent-soft: rgba(212,84,26,0.15);
+    --accent-glow: rgba(212,84,26,0.4);
+    --text-primary: #f0ece6;
+    --text-secondary: rgba(240,236,230,0.5);
+    --text-muted: rgba(240,236,230,0.3);
+    --glass: rgba(22,19,17,0.85);
+    --glass-light: rgba(255,255,255,0.06);
+    --danger: #ef4444;
+    --success: #22c55e;
+    --ai-grad: linear-gradient(135deg, #d4541a, #ff9a44);
+  }
 
-        /* Error Underline Animation */
-        .error-highlight {
-            text-decoration: underline wavy #ef4444;
-            text-decoration-thickness: 2px;
-            text-underline-offset: 4px;
-            cursor: pointer;
-            background-color: rgba(254, 226, 226, 0.4);
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-        .error-highlight:hover {
-            background-color: rgba(254, 226, 226, 0.8);
-            text-decoration-color: #dc2626;
-        }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Tooltip Animation */
-        .tooltip-container {
-            position: absolute;
-            background: white;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            border-radius: 0.75rem;
-            padding: 0.5rem;
-            z-index: 50;
-            min-width: 180px;
-            display: none;
-            animation: fadeIn 0.2s ease-out;
-            transform-origin: top left;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
+  body {
+    font-family: 'Space Mono', monospace;
+    background: var(--bg);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
 
-        /* Glassmorphism Header */
-        .glass-header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-        }
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.6;
+  }
 
-        /* Modal Styles */
-        .modal {
-            transition: opacity 0.25s ease;
-        }
-        body.modal-active {
-            overflow-x: hidden;
-            overflow-y: visible !important;
-        }
-    </style>
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 40% 50%, rgba(180,70,20,0.12) 0%, transparent 65%),
+                radial-gradient(ellipse 40% 40% at 80% 80%, rgba(212,84,26,0.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* LAYOUT */
+  .app {
+    display: grid;
+    grid-template-columns: 56px 1fr 300px;
+    grid-template-rows: 100vh;
+    height: 100vh;
+    gap: 0;
+    position: relative; z-index: 1;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px 0; gap: 8px;
+    border-right: 1px solid var(--border);
+    background: rgba(12,10,9,0.7);
+    backdrop-filter: blur(20px);
+  }
+
+  .sidebar-logo {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 14px; color: #fff;
+    margin-bottom: 16px;
+    box-shadow: 0 0 20px var(--accent-glow);
+    cursor: pointer;
+    transition: box-shadow 0.3s;
+  }
+  .sidebar-logo:hover { box-shadow: 0 0 30px var(--accent-glow); }
+
+  .sidebar-nav {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px; flex: 1;
+  }
+
+  .nav-item {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text-muted);
+    font-size: 16px;
+    position: relative;
+  }
+  .nav-item:hover { background: var(--surface); color: var(--text-primary); }
+  .nav-item.active { background: var(--accent-soft); color: var(--accent); }
+  .nav-item .badge {
+    position: absolute; top: 4px; right: 4px;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: 1.5px solid var(--bg);
+    display: none;
+  }
+  .nav-item.has-requests .badge { display: block; }
+
+  /* CANVAS / MAIN CONTENT */
+  .canvas {
+    position: relative; overflow: hidden;
+    background: transparent;
+    display: flex; flex-direction: column;
+  }
+
+  .canvas-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    z-index: 10;
+  }
+
+  .agent-pill {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 7px 14px 7px 7px;
+  }
+  .agent-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d4541a, #8b2f0a);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #fff; font-family: 'Noto Serif Bengali', serif;
+  }
+  .agent-info { line-height: 1.2; }
+  .agent-name { font-size: 11px; font-weight: 700; color: var(--text-primary); }
+  .agent-sub { font-size: 9px; color: var(--text-secondary); }
+
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  
+  .status-indicator {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--text-secondary);
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--danger);
+  }
+  .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+
+  .canvas-body {
+    flex: 1; padding: 20px;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface-hover); border-radius: 10px; }
+
+  /* VIEWS & TABLES */
+  .view-container { display: none; animation: fadeIn 0.3s ease; }
+  .view-container.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+  .view-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+  }
+  .view-title { font-size: 18px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 10px; }
+  
+  /* ALL BUTTONS ORANGE */
+  .btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-primary); padding: 8px 16px;
+    border-radius: 6px; font-family: 'Space Mono', monospace; font-size: 11px;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px; justify-content: center;
+  }
+  .btn:hover { background: var(--surface-hover); border-color: var(--text-secondary); }
+  
+  .btn-primary, .btn-success, .btn-danger, .btn-blue, 
+  .btn-export-csv, .btn-export-json, .btn-export-xls { 
+    background: var(--accent-soft); 
+    border-color: var(--accent); 
+    color: var(--accent); 
+  }
+  .btn-primary:hover, .btn-success:hover, .btn-danger:hover, .btn-blue:hover,
+  .btn-export-csv:hover, .btn-export-json:hover, .btn-export-xls:hover { 
+    background: var(--accent); 
+    color: #fff; 
+    box-shadow: 0 0 15px var(--accent-glow); 
+  }
+  
+  .btn-export-csv, .btn-export-json, .btn-export-xls {
+    flex: 1; padding: 12px;
+  }
+
+  /* Toggle Groups */
+  .toggle-group {
+    display: flex; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden; margin-bottom: 20px;
+  }
+  .toggle-btn {
+    flex: 1; padding: 10px; text-align: center; font-size: 11px;
+    cursor: pointer; color: var(--text-secondary);
+    transition: all 0.2s; font-weight: 700;
+  }
+  .toggle-btn.active { background: var(--accent-soft); color: var(--accent); }
+
+  .bengali-text { font-family: 'Noto Serif Bengali', serif; font-size: 14px; }
+  
+  .tag {
+    padding: 3px 8px; border-radius: 20px;
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    background: var(--surface); border: 1px solid var(--border);
+  }
+
+  /* FORMS & INPUT PROCESSOR */
+  .processor-layout {
+    display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 800px; margin: 0 auto;
+  }
+  .input-card {
+    background: rgba(18, 15, 13, 0.6); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .input-section-title {
+    font-size: 10px; color: var(--text-secondary); text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+  }
+  
+  .form-group { margin-bottom: 16px; position: relative; }
+  .form-label { display: block; font-size: 10px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px; }
+  .form-input {
+    width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+    color: var(--text-primary); padding: 12px; border-radius: 6px;
+    font-family: 'Space Mono', monospace; font-size: 12px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  select.form-input { appearance: none; }
+  textarea.form-input { resize: vertical; min-height: 80px; }
+  
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* AI Sparkle Button */
+  .ai-btn {
+    position: absolute; right: 6px; top: 6px;
+    background: var(--ai-grad); border: none;
+    width: 32px; height: 32px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 14px; color: #fff;
+  }
+  .ai-btn:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(212, 84, 26, 0.4); }
+
+  /* Import / Export Card */
+  .io-card {
+    background: rgba(18, 15, 13, 0.6); border: 1px dashed var(--border);
+    border-radius: 12px; padding: 20px; margin-top: 20px;
+  }
+  .dashed-btn {
+    width: 100%; background: transparent; border: 1px dashed var(--accent);
+    color: var(--accent); padding: 16px; border-radius: 8px;
+    font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .dashed-btn:hover { background: var(--accent-soft); }
+
+  /* RIGHT PANEL */
+  .panel {
+    background: rgba(14,12,11,0.85);
+    border-left: 1px solid var(--border);
+    backdrop-filter: blur(24px);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-section { padding: 20px; border-bottom: 1px solid var(--border); }
+  .panel-title { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 12px; border-radius: 8px;
+  }
+  .stat-val { font-size: 20px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .stat-label { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; }
+
+  /* Mascot Area */
+  .mascot-hero {
+    flex: 1; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .mascot-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(212,84,26,0.05) 100%);
+  }
+  .mascot-title {
+    position: absolute; top: 20px; left: 20px;
+    font-family: 'Bebas Neue', cursive; font-size: 28px; letter-spacing: 3px;
+    color: var(--text-primary); z-index: 3;
+  }
+  .mascot-title span { color: var(--accent); }
+  
+  .mascot-img {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    height: 70%; object-fit: contain; z-index: 2;
+  }
+
+  .panel-footer {
+    padding: 15px 20px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .admin-status { font-size: 10px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;}
+  .admin-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); transition: background 0.3s, box-shadow 0.3s; }
+  .admin-dot.active { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
+
+  /* MODALS */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+    display: none; align-items: center; justify-content: center; z-index: 9999;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .modal-overlay.active { display: flex; opacity: 1; }
+  
+  .modal-content {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; width: 100%; max-width: 400px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    position: relative;
+    transform: translateY(20px); transition: transform 0.3s;
+  }
+  .modal-overlay.active .modal-content { transform: translateY(0); }
+  
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    color: var(--text-muted); cursor: pointer; font-size: 14px;
+  }
+  .modal-close:hover { color: var(--text-primary); }
+
+  .empty-state {
+    padding: 40px; text-align: center; color: var(--text-secondary);
+    font-size: 12px; background: rgba(255,255,255,0.02); border-radius: 8px;
+    border: 1px dashed var(--border);
+  }
+
+  /* Checkbox Custom */
+  .checkbox-wrap { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-secondary); margin-bottom: 16px; cursor: pointer; }
+  .checkbox-wrap input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+
+  /* NEW RICH CARDS & FILTERS */
+  .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid var(--border); }
+  .filter-select { background: var(--bg); border: 1px solid var(--border); color: var(--text-primary); padding: 8px 12px; border-radius: 6px; font-family: 'Space Mono', monospace; font-size: 11px; outline: none; min-width: 140px; }
+  .filter-select:focus { border-color: var(--accent); }
+  .filter-reset { color: var(--accent); cursor: pointer; font-size: 11px; font-weight: 700; margin-left: auto; background: transparent; border: none; font-family: 'Space Mono', monospace; }
+  .filter-reset:hover { text-decoration: underline; }
+
+  /* Rich Card Layouts */
+  .rich-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; position: relative; transition: border-color 0.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+  .rich-card:hover { border-color: rgba(255,255,255,0.15); }
+  .rc-title-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .rc-title { font-size: 28px; font-family: 'Noto Serif Bengali', serif; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px; line-height: 1; margin-bottom: 12px; }
+  .rc-views { background: rgba(255,255,255,0.05); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; color: var(--text-secondary); }
+  .rc-translation { font-size: 15px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .rc-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .rc-tag { padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; border: 1px solid transparent; }
+  .tag-pos { background: rgba(41, 128, 185, 0.1); border-color: rgba(41, 128, 185, 0.3); color: #74b9ff; }
+  .tag-cat { background: rgba(155, 89, 182, 0.1); border-color: rgba(155, 89, 182, 0.3); color: #a29bfe; }
+  .tag-banglish { background: var(--surface); border-color: var(--border); color: var(--text-secondary); font-style: italic; font-weight: 400; }
+  .rc-footer { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-muted); padding-top: 16px; border-top: 1px solid var(--surface-hover); }
+  .rc-meta-item { display: flex; align-items: center; gap: 6px; }
+  .rc-actions { display: flex; gap: 8px; }
+
+  /* Contribution Center specific */
+  .contrib-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+  .contrib-titles h2 { font-size: 22px; margin-bottom: 4px; color: var(--text-primary); }
+  .contrib-titles p { font-size: 11px; color: var(--text-secondary); }
+  .contrib-toggles { display: flex; background: var(--bg); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); padding: 4px; gap: 4px;}
+  .contrib-btn { padding: 8px 16px; font-size: 11px; border-radius: 6px; cursor: pointer; color: var(--text-secondary); font-weight: 700; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+  .contrib-btn.active { background: var(--accent); color: #fff; box-shadow: 0 0 10px var(--accent-glow); }
+  .contrib-badge { background: rgba(255,255,255,0.2); border-radius: 10px; padding: 2px 6px; font-size: 9px; }
+
+  .req-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; border-left: 6px solid var(--border); position: relative;}
+  .req-card.type-word { border-left-color: var(--accent); }
+  .req-card.type-sentence { border-left-color: var(--accent); }
+  .req-meta { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; font-size: 11px; color: var(--text-muted); }
+  .req-pill { background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; color: var(--text-primary); font-weight: 700; font-size: 9px; letter-spacing: 0.5px;}
+  .req-pill.blue { background: var(--accent-soft); color: var(--accent); }
+  
+  .req-diff { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; padding: 16px;}
+  .diff-label { font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;}
+  .diff-label.suggested { color: var(--accent); text-align: center; }
+  
+  .req-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+  /* DASHBOARD UI STYLES */
+  .analytics-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .acard { padding: 20px; border-radius: 12px; position: relative; overflow: hidden; display: flex; align-items: center; gap: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  .acard-icon { width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  .acard-info { flex: 1; }
+  .acard-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; margin-bottom: 6px; }
+  .acard-val { font-size: 28px; font-weight: 700; line-height: 1; }
+  .bg-grad-green { background: linear-gradient(135deg, #2dd4bf, #0f766e); color: #fff; }
+  .bg-grad-blue { background: linear-gradient(135deg, #8b5cf6, #4338ca); color: #fff; }
+  .bg-grad-purple { background: linear-gradient(135deg, #c084fc, #7e22ce); color: #fff; }
+  .bg-grad-orange { background: linear-gradient(135deg, #f97316, #b91c1c); color: #fff; }
+
+  .analytics-tabs { display: flex; gap: 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .atab { padding: 12px 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; display: flex; align-items: center; gap: 8px; transition: color 0.2s;}
+  .atab:hover { color: var(--text-primary); }
+  .atab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  
+  .analytics-panel { display: none; animation: fadeIn 0.3s ease; }
+  .analytics-panel.active { display: block; }
+
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .chart-box { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+  .chart-header { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 30px; display: flex; align-items: center; gap: 8px; }
+  
+  /* Donut Chart Specifics */
+  .donut-container { display: flex; flex-direction: column; align-items: center; }
+  .donut-hole { width: 180px; height: 180px; border-radius: 50%; position: relative; transition: all 0.5s; }
+  .donut-hole::after { content: ''; position: absolute; inset: 25px; background: var(--bg); border-radius: 50%; }
+  .donut-legend { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 30px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-secondary); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+  /* Radar Chart Specifics */
+  .radar-container { display: flex; justify-content: center; align-items: center; width: 100%; position: relative; }
+
+  /* SPELL CHECKER STYLES */
+  .error-highlight {
+    text-decoration: underline wavy var(--danger);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    cursor: pointer;
+    background-color: rgba(239, 68, 68, 0.15);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+  .error-highlight:hover { background-color: rgba(239, 68, 68, 0.3); }
+
+  .tooltip-container {
+    position: absolute;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border-radius: 8px;
+    padding: 8px;
+    z-index: 100;
+    min-width: 180px;
+    display: none;
+    animation: fadeIn 0.2s ease-out;
+  }
+  .sc-sugg-btn {
+    display: block; width: 100%; text-align: left; padding: 6px 10px; font-size: 12px; color: var(--text-primary);
+    border-radius: 4px; background: transparent; border: none; cursor: pointer; transition: background 0.2s;
+  }
+  .sc-sugg-btn:hover { background: var(--surface-hover); }
+  .sc-sugg-btn.primary { font-weight: 700; color: var(--accent); background: var(--accent-soft); }
+  .sc-sugg-btn.primary:hover { background: var(--accent-glow); color: #fff; }
+
+</style>
 </head>
-<body class="h-screen flex flex-col text-slate-800">
+<body>
+<div class="app">
 
-    <!-- Navbar -->
-    <header class="glass-header py-4 px-6 md:px-12 flex justify-between items-center sticky top-0 z-40">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-teal-500/30">
-                <span class="mt-[-4px]">ব</span>
-            </div>
-            <div>
-                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600">BornoBondhu52</h1>
-                <p class="text-[10px] text-slate-400 font-medium tracking-wider uppercase">Advanced AI Spell Checker</p>
-            </div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">B</div>
+    <div class="sidebar-nav">
+      <div class="nav-item active" data-view="dictionary" title="Dictionary"><i class="fa-solid fa-book"></i></div>
+      <div class="nav-item" data-view="sentences" title="Sentences"><i class="fa-solid fa-file-lines"></i></div>
+      <div class="nav-item" data-view="input" title="Input Processor"><i class="fa-solid fa-pen-nib"></i></div>
+      <div class="nav-item" data-view="spellchecker" title="Spell Checker"><i class="fa-solid fa-spell-check"></i></div>
+      <div class="nav-item" data-view="analytics" title="Analytics"><i class="fa-solid fa-chart-simple"></i></div>
+      <div class="nav-item" data-view="requests" title="Requests">
+        <i class="fa-solid fa-code-pull-request"></i><span class="badge" id="requests-badge"></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CANVAS -->
+  <main class="canvas">
+    <!-- Header -->
+    <div class="canvas-header">
+      <div class="agent-pill">
+        <div class="agent-avatar">ব</div>
+        <div class="agent-info">
+          <div class="agent-name">Borno.AI DB</div>
+          <div class="agent-sub">Linguistic Core v1.5</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="status-indicator">
+          <div class="status-dot" id="db-status-dot"></div>
+          <span id="db-status-text">Connecting...</span>
+        </div>
+        <button class="btn btn-primary" onclick="switchView('input')">+ Add Entry</button>
+      </div>
+    </div>
+
+    <!-- Body / Views -->
+    <div class="canvas-body">
+      
+      <!-- View: Dictionary -->
+      <div id="view-dictionary" class="view-container active">
+        <div class="view-header" style="margin-bottom: 10px;">
+          <div class="view-title"><i class="fa-brands fa-stack-overflow"></i> Lexicon / শব্দকোষ</div>
         </div>
         
-        <div class="flex items-center gap-4">
-            <!-- Dictionary Manager Button -->
-            <button onclick="toggleModal('dictionary-modal')" class="text-slate-500 hover:text-teal-600 font-medium text-sm flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                Dictionary Manager
-            </button>
+        <div class="filter-bar">
+          <select class="filter-select" id="filt-dict-pos" onchange="updateFilters('dict')">
+            <option value="All">All Parts of Speech</option>
+            <option value="Noun">Noun</option>
+            <option value="Pronoun">Pronoun</option>
+            <option value="Adjective">Adjective</option>
+            <option value="Verb">Verb</option>
+            <option value="Adverb">Adverb</option>
+            <option value="Preposition">Preposition</option>
+            <option value="Conjunction">Conjunction</option>
+            <option value="Interjection">Interjection</option>
+          </select>
+          <select class="filter-select" id="filt-dict-cat" onchange="updateFilters('dict')">
+            <option value="All">All Categories</option>
+            <option value="General">General</option>
+            <option value="Nature">Nature</option>
+            <option value="Technology">Technology</option>
+            <option value="Science">Science</option>
+            <option value="Culture">Culture</option>
+            <option value="Astronomy">Astronomy</option>
+          </select>
+          <select class="filter-select" id="filt-dict-trans" onchange="updateFilters('dict')">
+            <option value="All">Translation Status: All</option>
+            <option value="Translated">Translated Only</option>
+            <option value="Missing Translation">Missing Translation</option>
+          </select>
+          <select class="filter-select" id="filt-dict-review" onchange="updateFilters('dict')">
+            <option value="All">Review Status: All</option>
+            <option value="Reviewed Only">Reviewed Only</option>
+            <option value="Unreviewed">Unreviewed</option>
+          </select>
+          <button class="filter-reset" onclick="resetFilters('dict')">Reset All</button>
+        </div>
 
-            <!-- Status Indicator -->
-             <div class="flex items-center gap-2">
-                <span id="typing-status" class="hidden flex items-center gap-2 text-xs font-semibold text-teal-600 bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
-                    <span class="relative flex h-2 w-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
-                    </span>
-                    Analyzing...
-                </span>
+        <div id="dictionary-list">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- View: Sentences -->
+      <div id="view-sentences" class="view-container">
+        <div class="view-header" style="margin-bottom: 10px;">
+          <div class="view-title"><i class="fa-solid fa-code-merge"></i> Corpus / বাক্য ভাণ্ডার</div>
+        </div>
+
+        <div class="filter-bar">
+          <select class="filter-select" id="filt-sent-trans" onchange="updateFilters('sent')">
+            <option value="All">Translation Status: All</option>
+            <option value="Translated">Translated Only</option>
+            <option value="Missing Translation">Missing Translation</option>
+          </select>
+          <select class="filter-select" id="filt-sent-review" onchange="updateFilters('sent')">
+            <option value="All">Review Status: All</option>
+            <option value="Reviewed Only">Reviewed Only</option>
+            <option value="Unreviewed">Unreviewed</option>
+          </select>
+          <button class="filter-reset" onclick="resetFilters('sent')">Reset All</button>
+        </div>
+
+        <div id="sentences-list">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- View: Input Processor -->
+      <div id="view-input" class="view-container">
+        <div class="view-header">
+          <div class="view-title"><i class="fa-solid fa-pen-nib"></i> Input Processor</div>
+        </div>
+        
+        <div class="processor-layout">
+
+          <!-- Mode Toggle -->
+          <div class="toggle-group" style="max-width: 400px; margin: 0 auto 20px;">
+            <div class="toggle-btn active" id="btn-mode-bulk" onclick="setInputMode('bulk')">Bulk Import</div>
+            <div class="toggle-btn" id="btn-mode-single" onclick="setInputMode('single')">Single Entry</div>
+          </div>
+
+          <!-- Source Context (Global for both Bulk & Single) -->
+          <div class="input-card" style="margin-bottom: 20px;">
+            <div class="input-section-title">📖 Source Context</div>
+            <div class="input-row">
+              <div class="form-group">
+                <input type="text" class="form-input" id="inp-sc-author" placeholder="Author Name">
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-input" id="inp-sc-source" placeholder="Source (e.g. Book, URL)">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <select class="form-input" id="inp-sc-category">
+                <option value="" disabled selected>Select Category...</option>
+                <option value="General">General</option>
+                <option value="Literature">Literature</option>
+                <option value="Technology">Technology</option>
+                <option value="Science">Science</option>
+                <option value="Culture">Culture</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- SECTION: BULK IMPORT -->
+          <div id="mode-bulk" class="input-card">
+            <div class="form-group">
+              <textarea class="form-input bengali-text" id="inp-bulk-text" rows="8" placeholder="Paste raw Bangla text here..."></textarea>
+            </div>
+            <label class="checkbox-wrap">
+              <input type="checkbox" id="inp-bulk-auto-translate">
+              Auto-translate content (AI)
+            </label>
+            <div class="input-row">
+              <button class="btn btn-primary" onclick="handleExtract('words')"><i class="fa-solid fa-code-merge"></i> Extract Words</button>
+              <button class="btn btn-primary" onclick="handleExtract('sentences')"><i class="fa-solid fa-code-merge"></i> Extract Sentences</button>
+            </div>
+          </div>
+
+          <!-- SECTION: SINGLE ENTRY -->
+          <div id="mode-single" style="display: none;">
+
+            <!-- Type Toggle -->
+            <div class="toggle-group" style="max-width: 400px; margin: 0 auto 20px;">
+              <div class="toggle-btn active" id="btn-type-word" onclick="setEntryType('word')">Word</div>
+              <div class="toggle-btn" id="btn-type-sentence" onclick="setEntryType('sentence')">Sentence</div>
             </div>
 
-            <!-- Fix All Button -->
-            <button id="fix-all-btn" onclick="applyAutoCorrect()" class="hidden group relative inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white transition-all duration-200 bg-gradient-to-r from-teal-600 to-emerald-600 rounded-full hover:from-teal-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 shadow-md shadow-teal-500/20">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                Auto Fix All
-            </button>
-        </div>
-    </header>
+            <!-- Word Form -->
+            <div id="form-word" class="input-card">
+              <div class="form-group">
+                <input type="text" class="form-input bengali-text" id="inp-w-bn" placeholder="Bangla Word (e.g. সূর্য)">
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-input" id="inp-w-banglish" placeholder="Banglish (e.g. Surjo)">
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-input" id="inp-w-en" placeholder="Translation" style="padding-right: 45px;">
+                <button class="ai-btn" onclick="triggerAITranslate('word')" title="Auto-Translate">✨</button>
+              </div>
+              <div class="form-group">
+                <select class="form-input" id="inp-w-pos">
+                  <option value="" disabled selected>Part of Speech...</option>
+                  <option value="Noun">Noun</option>
+                  <option value="Verb">Verb</option>
+                  <option value="Adjective">Adjective</option>
+                  <option value="Adverb">Adverb</option>
+                  <option value="Pronoun">Pronoun</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700;" onclick="handleSubmitEntry()">+ Add to Dictionary</button>
+            </div>
 
-    <!-- Main Workspace -->
-    <main class="flex-1 flex flex-col md:flex-row overflow-hidden max-w-7xl mx-auto w-full p-4 md:p-8 gap-6">
-        
-        <!-- Editor Container -->
-        <div class="flex-1 bg-white rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col overflow-hidden relative group transition-shadow hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.08)]">
+            <!-- Sentence Form -->
+            <div id="form-sentence" class="input-card" style="display: none;">
+              <div class="form-group">
+                <textarea class="form-input bengali-text" id="inp-s-bn" rows="4" placeholder="Type sentence here..."></textarea>
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-input" id="inp-s-en" placeholder="English Translation" style="padding-right: 45px;">
+                <button class="ai-btn" onclick="triggerAITranslate('sentence')" title="Auto-Translate">✨</button>
+              </div>
+              <button class="btn btn-primary" style="width: 100%; padding: 12px; font-weight: 700;" onclick="handleSubmitEntry()">+ Add Sentence</button>
+            </div>
+
+            <div style="font-size: 9px; color: var(--text-muted); text-align: center; margin-top: 10px;" id="submit-notice">
+              Please log in to submit entries.
+            </div>
+          </div>
+          
+          <!-- IMPORT / EXPORT UTILITIES -->
+          <div class="io-card">
+            <button class="dashed-btn" onclick="document.getElementById('file-upload').click()">↑ Import CSV Data</button>
+            <input type="file" id="file-upload" style="display:none" accept=".csv" onchange="handleImportCSV(event)">
             
+            <div style="margin-top: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div class="input-section-title" style="margin: 0;">💾 EXPORT DATA</div>
+                <div style="display:flex; background: rgba(0,0,0,0.5); border-radius: 20px; border: 1px solid var(--border); overflow: hidden;">
+                  <div class="toggle-btn active" id="btn-export-word" style="padding: 4px 12px; font-size: 9px;" onclick="setExportType('word')">Words</div>
+                  <div class="toggle-btn" id="btn-export-sentence" style="padding: 4px 12px; font-size: 9px;" onclick="setExportType('sentence')">Sentences</div>
+                </div>
+              </div>
+              
+              <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary btn-export-csv" onclick="exportData('csv')"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                <button class="btn btn-primary btn-export-json" onclick="exportData('json')"><i class="fa-brands fa-node-js"></i> JSON</button>
+                <button class="btn btn-primary btn-export-xls" onclick="exportData('xls')"><i class="fa-solid fa-file-excel"></i> XLS</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- View: Spell Checker -->
+      <div id="view-spellchecker" class="view-container">
+        <div class="view-header">
+          <div class="view-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Intelligent Spell Checker</div>
+          <div class="header-actions">
+             <span id="sc-status-msg" style="font-size: 10px; color: var(--text-secondary); margin-right: 10px;">Ready</span>
+             <button class="btn btn-primary" id="sc-fix-all-btn" style="display: none;" onclick="scApplyAutoCorrect()">Auto Fix All</button>
+             <button class="btn" onclick="openDictionaryModal()"><i class="fa-solid fa-book-atlas"></i> Dictionary</button>
+          </div>
+        </div>
+
+        <div class="input-card" style="height: calc(100vh - 180px); display: flex; flex-direction: column; padding: 0; overflow: hidden; position: relative;">
             <!-- Toolbar -->
-            <div class="px-6 py-3 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Editor</span>
-                <div class="flex gap-2">
-                    <button onclick="copyText()" class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition" title="Copy Text">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                    </button>
-                    <button onclick="resetEditor()" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition" title="Clear All">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
+            <div style="padding: 10px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02);">
+                <span style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Editor Workspace</span>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" style="padding: 4px 8px;" onclick="scCopyText()" title="Copy Text"><i class="fa-regular fa-copy"></i></button>
+                    <button class="btn" style="padding: 4px 8px; color: var(--danger); border-color: rgba(239,68,68,0.3);" onclick="scResetEditor()" title="Clear"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </div>
-
-            <div class="relative flex-1">
-                <!-- Raw Input -->
-                <textarea id="input-text" 
-                    class="bangla-font w-full h-full p-8 text-lg md:text-xl text-slate-700 focus:outline-none resize-none bg-transparent leading-relaxed placeholder:text-slate-300"
-                    placeholder="এখানে লেখা শুরু করুন... (Start typing here)"></textarea>
-
-                <!-- Processed Output (Overlay) -->
-                <div id="output-area" 
-                    class="bangla-font w-full h-full p-8 text-lg md:text-xl text-slate-700 absolute top-0 left-0 bg-white/95 overflow-auto hidden leading-relaxed"
-                    contenteditable="false">
-                </div>
+            
+            <!-- Editor Area -->
+            <div style="position: relative; flex: 1;">
+                <textarea id="sc-input" class="bangla-font" style="width: 100%; height: 100%; background: transparent; border: none; padding: 24px; color: var(--text-primary); font-size: 18px; outline: none; resize: none; line-height: 1.6;" placeholder="এখানে লেখা শুরু করুন... (Start typing here)"></textarea>
+                <div id="sc-output" class="bangla-font" style="position: absolute; inset: 0; padding: 24px; font-size: 18px; color: var(--text-primary); background: var(--bg); overflow: auto; display: none; line-height: 1.6;"></div>
             </div>
 
-            <!-- Footer Stats -->
-            <div class="px-6 py-2 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400">
-                <span id="word-count">0 words</span>
-                <span id="status-msg">Ready</span>
+            <!-- Footer -->
+            <div style="padding: 8px 20px; border-top: 1px solid var(--border); background: rgba(255,255,255,0.02); font-size: 10px; color: var(--text-secondary); display: flex; justify-content: space-between;">
+                <span id="sc-word-count">0 words</span>
+                <span>Borno.AI Engine v2.0</span>
             </div>
         </div>
+      </div>
 
-    </main>
+      <!-- View: Analytics -->
+      <div id="view-analytics" class="view-container">
+        <div class="view-header">
+          <div class="view-title">Analytics Dashboard</div>
+          <button class="btn btn-primary" style="font-size:10px; border-radius:20px; padding: 6px 14px;">Live Data Overview</button>
+        </div>
 
-    <!-- Suggestion Tooltip -->
-    <div id="suggestion-tooltip" class="tooltip-container">
-        <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-100">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Suggestions</span>
-            <button onclick="hideTooltip()" class="text-slate-300 hover:text-slate-500">&times;</button>
+        <div class="analytics-cards">
+          <div class="acard bg-grad-green">
+            <div class="acard-icon">
+              <i class="fa-solid fa-database"></i>
+            </div>
+            <div class="acard-info">
+              <div class="acard-label">Total Words</div>
+              <div class="acard-val" id="stat-dash-words">0</div>
+            </div>
+          </div>
+          <div class="acard bg-grad-blue">
+            <div class="acard-icon">
+              <i class="fa-solid fa-message"></i>
+            </div>
+            <div class="acard-info">
+              <div class="acard-label">Total Sentences</div>
+              <div class="acard-val" id="stat-dash-sentences">0</div>
+            </div>
+          </div>
+          <div class="acard bg-grad-purple">
+            <div class="acard-icon">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div class="acard-info">
+              <div class="acard-label">Reviewed Words</div>
+              <div class="acard-val" id="stat-dash-reviewed">0%</div>
+            </div>
+          </div>
+          <div class="acard bg-grad-orange">
+            <div class="acard-icon">
+              <i class="fa-solid fa-language"></i>
+            </div>
+            <div class="acard-info">
+              <div class="acard-label">Translated Words</div>
+              <div class="acard-val" id="stat-dash-translated">0%</div>
+            </div>
+          </div>
         </div>
-        <div id="suggestion-list" class="flex flex-col space-y-1">
-            <!-- Dynamic Content -->
+
+        <div class="analytics-tabs">
+          <div class="atab active" data-atab="overview" onclick="switchAnalyticsTab('overview')">
+            <i class="fa-solid fa-chart-pie"></i> Overview
+          </div>
+          <div class="atab" data-atab="growth" onclick="switchAnalyticsTab('growth')">
+            <i class="fa-solid fa-arrow-trend-up"></i> Growth Trends
+          </div>
+          <div class="atab" data-atab="contributors" onclick="switchAnalyticsTab('contributors')">
+            <i class="fa-solid fa-users"></i> Contributors
+          </div>
+          <div class="atab" data-atab="health" onclick="switchAnalyticsTab('health')">
+            <i class="fa-solid fa-heart-pulse"></i> Content Health
+          </div>
         </div>
+
+        <!-- TAB: Overview -->
+        <div id="tab-overview" class="analytics-panel active">
+          <div class="charts-grid">
+            <div class="chart-box">
+              <div class="chart-header">
+                <i class="fa-solid fa-chart-pie" style="color:var(--accent);"></i>
+                Top 5 Categories
+              </div>
+              <div id="dash-cat-chart"></div>
+            </div>
+            <div class="chart-box">
+              <div class="chart-header">
+                <i class="fa-solid fa-spider" style="color:var(--accent);"></i>
+                Part of Speech
+              </div>
+              <div id="dash-pos-chart" class="radar-container"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Growth Trends -->
+        <div id="tab-growth" class="analytics-panel">
+          <div class="chart-box" style="grid-column: 1 / -1;">
+            <div class="chart-header">
+              <i class="fa-solid fa-arrow-trend-up" style="color:var(--accent);"></i>
+              Content Growth Over Time
+            </div>
+            <div id="dash-growth-chart" style="height: 300px; display:flex; align-items:center; justify-content:center;">
+              <!-- Rendered SVG Line Chart -->
+            </div>
+            <div style="display:flex; gap:16px; justify-content:center; margin-top:16px;">
+              <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>Total Sentences</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#2dd4bf"></div>Total Words</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Contributors -->
+        <div id="tab-contributors" class="analytics-panel">
+          <div class="chart-box" style="grid-column: 1 / -1;">
+            <div class="chart-header">
+              <i class="fa-solid fa-users" style="color:var(--accent);"></i>
+              Top Contributors
+            </div>
+            <div id="dash-contrib-chart">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Content Health -->
+        <div id="tab-health" class="analytics-panel">
+          <div class="charts-grid">
+            <div class="chart-box">
+              <div class="chart-header">
+                <i class="fa-solid fa-shield-halved" style="color:var(--accent);"></i>
+                Review Status
+              </div>
+              <div id="dash-review-chart"></div>
+            </div>
+            <div class="chart-box">
+              <div class="chart-header">
+                <i class="fa-solid fa-language" style="color:var(--accent);"></i>
+                Translation Coverage
+              </div>
+              <div id="dash-trans-chart"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- View: Requests -->
+      <div id="view-requests" class="view-container">
+        <div class="contrib-header-row">
+          <div class="contrib-titles">
+            <h2>Contribution Center</h2>
+            <p>Review and manage community contributions.</p>
+          </div>
+          <div class="contrib-toggles">
+            <div class="contrib-btn active" id="btn-contrib-word" onclick="setContribTab('word')">
+              <i class="fa-solid fa-code-pull-request"></i> Word Requests <span class="contrib-badge" id="badge-word-reqs">0</span>
+            </div>
+            <div class="contrib-btn" id="btn-contrib-sentence" onclick="setContribTab('sentence')">
+              <i class="fa-solid fa-quote-right"></i> Grant Sentences <span class="contrib-badge" id="badge-sent-reqs">0</span>
+            </div>
+          </div>
+        </div>
+        
+        <div id="requests-list">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- RIGHT PANEL -->
+  <aside class="panel">
+    <div class="panel-section">
+      <div class="panel-title">Database Stats</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="stat-words">0</div>
+          <div class="stat-label">Total Words</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-sentences">0</div>
+          <div class="stat-label">Sentences</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-requests">0</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">99%</div>
+          <div class="stat-label">Accuracy</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Dictionary Manager Modal -->
-    <div id="dictionary-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
-        <div class="modal-overlay absolute w-full h-full bg-slate-900 opacity-50"></div>
-        
-        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded-2xl shadow-2xl z-50 overflow-y-auto transform transition-all scale-95">
-            <!-- Header -->
-            <div class="modal-content py-6 text-left px-6">
-                <div class="flex justify-between items-center pb-3">
-                    <p class="text-xl font-bold text-slate-800">Dictionary Manager</p>
-                    <div class="modal-close cursor-pointer z-50" onclick="toggleModal('dictionary-modal')">
-                        <svg class="fill-current text-slate-500 hover:text-slate-700" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
-                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"></path>
-                        </svg>
-                    </div>
-                </div>
-
-                <!-- Body -->
-                <div class="my-4">
-                    <p class="text-sm text-slate-500 mb-2">Check if a word exists in the dictionary or add a new one.</p>
-                    <input type="text" id="dict-search-input" class="bangla-font w-full border border-slate-300 rounded-lg px-4 py-3 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500" placeholder="Type a word (e.g. হ্যালো)">
-                    
-                    <div id="dict-result" class="mt-4 hidden p-4 rounded-lg bg-slate-50 border border-slate-100">
-                        <div class="flex items-center gap-3">
-                            <div id="dict-icon" class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200">
-                                <!-- Icon injected via JS -->
-                            </div>
-                            <div>
-                                <p id="dict-status-text" class="font-bold text-slate-800 text-sm">Searching...</p>
-                                <p id="dict-word-display" class="bangla-font text-slate-500 text-xs"></p>
-                            </div>
-                        </div>
-                        <button id="modal-add-btn" class="hidden mt-3 w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition text-sm">
-                            Add to Dictionary
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Footer -->
-                <div class="flex justify-end pt-2">
-                    <button onclick="toggleModal('dictionary-modal')" class="px-4 py-2 bg-transparent p-3 rounded-lg text-teal-600 hover:bg-slate-100 hover:text-teal-800 mr-2 text-sm font-medium">Close</button>
-                </div>
-            </div>
-        </div>
+    <!-- Cyber Mascot Area -->
+    <div class="mascot-hero">
+      <div class="mascot-bg"></div>
+      <div class="mascot-title">BORNO<span>.</span>AI</div>
+      <svg class="mascot-img" viewBox="0 0 160 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="80" cy="258" rx="50" ry="8" fill="rgba(0,0,0,0.4)"/>
+        <!-- Cyber/AI Core structure -->
+        <path d="M50 150 L30 250 L130 250 L110 150 Z" fill="#1a1614"/>
+        <path d="M60 150 L50 250 L80 230 L110 250 L100 150 Z" fill="#201a17"/>
+        <rect x="55" y="110" width="50" height="40" rx="5" fill="#2a2220"/>
+        <line x1="55" y1="125" x2="105" y2="125" stroke="#d4541a" stroke-width="1" opacity="0.3"/>
+        <line x1="55" y1="135" x2="105" y2="135" stroke="#d4541a" stroke-width="1" opacity="0.3"/>
+        <!-- Neck -->
+        <rect x="72" y="90" width="16" height="20" rx="2" fill="#2d1f18"/>
+        <!-- Head -->
+        <ellipse cx="80" cy="72" rx="24" ry="26" fill="#1e1916" stroke="#2a2520" stroke-width="2"/>
+        <!-- Face plate -->
+        <path d="M65 65 Q80 85 95 65 L90 50 Q80 40 70 50 Z" fill="#111"/>
+        <!-- Glowing eye -->
+        <circle cx="80" cy="65" r="6" fill="#d4541a" filter="url(#glow)"/>
+        <circle cx="80" cy="65" r="2" fill="#fff"/>
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+      </svg>
     </div>
 
-    <script>
-        const inputText = document.getElementById('input-text');
-        const outputArea = document.getElementById('output-area');
-        const tooltip = document.getElementById('suggestion-tooltip');
-        const suggestionList = document.getElementById('suggestion-list');
-        const statusMsg = document.getElementById('status-msg');
-        const typingStatus = document.getElementById('typing-status');
-        const fixAllBtn = document.getElementById('fix-all-btn');
-        const wordCount = document.getElementById('word-count');
+    <div class="panel-footer">
+      <div class="admin-status" id="admin-status-indicator">
+        <div class="admin-dot" id="admin-dot"></div>
+        <span id="admin-text">Guest Mode</span>
+      </div>
+      <button class="btn btn-primary" onclick="openLoginModal()" id="login-btn">Login / Register</button>
+    </div>
+  </aside>
+</div>
 
-        let isEditMode = true;
-        let latestCorrectedText = "";
-        let typingTimer;
-        const DONE_TYPING_INTERVAL = 1200; // 1.2s delay
+<!-- MODALS -->
 
-        // --- Dictionary Manager Logic ---
-        const dictInput = document.getElementById('dict-search-input');
-        const dictResult = document.getElementById('dict-result');
-        const dictStatusText = document.getElementById('dict-status-text');
-        const dictWordDisplay = document.getElementById('dict-word-display');
-        const dictIcon = document.getElementById('dict-icon');
-        const modalAddBtn = document.getElementById('modal-add-btn');
-        let searchTimeout;
+<!-- Auth Modal (Handles Contributor and Admin) -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal-content">
+    <div class="modal-close" onclick="closeModals()">✕</div>
+    <div class="view-title" style="margin-bottom: 20px;">Authentication</div>
+    
+    <div class="toggle-group" style="margin-bottom: 20px;">
+      <div class="toggle-btn active" id="tab-auth-contrib" onclick="switchAuthTab('contrib')">Contributor</div>
+      <div class="toggle-btn" id="tab-auth-admin" onclick="switchAuthTab('admin')">Admin <span style="font-size:10px;">🛡️</span></div>
+    </div>
 
-        function toggleModal(modalID){
-            const modal = document.getElementById(modalID);
-            modal.classList.toggle('opacity-0');
-            modal.classList.toggle('pointer-events-none');
-            document.body.classList.toggle('modal-active');
-            
-            if (!modal.classList.contains('opacity-0')) {
-                // Reset when opening
-                dictInput.value = '';
-                dictResult.classList.add('hidden');
-                dictInput.focus();
-            }
-        }
+    <!-- Contributor Login/Register -->
+    <div id="auth-form-contrib">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="auth-name" placeholder="E.g., John Doe">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="auth-email" placeholder="john@example.com">
+      </div>
+      <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;" onclick="handleContribAuth()">Register / Login</button>
+      <div style="font-size: 9px; color: var(--text-muted); text-align: center; margin-top: 10px;">If the email is new, an account will be created automatically.</div>
+    </div>
 
-        dictInput.addEventListener('input', () => {
-            clearTimeout(searchTimeout);
-            const word = dictInput.value.trim();
-            
-            if (word.length === 0) {
-                dictResult.classList.add('hidden');
-                return;
-            }
+    <!-- Admin Login -->
+    <div id="auth-form-admin" style="display: none;">
+      <div class="form-group">
+        <label class="form-label">Admin Passcode</label>
+        <input type="password" class="form-input" id="admin-passcode" placeholder="Enter passcode (e.g., admin123)">
+      </div>
+      <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;" onclick="handleAdminLogin()">Authenticate Admin</button>
+    </div>
 
-            searchTimeout = setTimeout(() => searchDictionary(word), 500);
-        });
+    <div id="login-error" style="color: var(--danger); font-size: 10px; margin-top: 10px; text-align: center; display: none;">Error message here.</div>
+  </div>
+</div>
 
-        async function searchDictionary(word) {
-            dictResult.classList.remove('hidden');
-            dictStatusText.textContent = "Checking...";
-            dictWordDisplay.textContent = word;
-            dictIcon.className = "w-8 h-8 rounded-full flex items-center justify-center bg-slate-200 animate-pulse";
-            modalAddBtn.classList.add('hidden');
+<!-- Spell Checker Suggestions Tooltip -->
+<div id="sc-tooltip" class="tooltip-container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border);">
+        <span style="font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">SUGGESTIONS</span>
+        <span style="cursor: pointer; font-size: 14px; color: var(--text-muted);" onclick="scHideTooltip()">&times;</span>
+    </div>
+    <div id="sc-tooltip-content" style="display: flex; flex-direction: column; gap: 4px;"></div>
+</div>
 
-            try {
-                const response = await fetch('/api/search_word', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ word: word })
-                });
-                const data = await response.json();
+<!-- Dictionary Manager Modal -->
+<div class="modal-overlay" id="dict-modal">
+  <div class="modal-content">
+    <div class="modal-close" onclick="closeModals()">✕</div>
+    <div class="view-title" style="margin-bottom: 20px;"><i class="fa-solid fa-book-atlas"></i> Dictionary Manager</div>
+    
+    <div class="form-group">
+        <input type="text" class="form-input bangla-font" id="dict-search-input" placeholder="Type word to check (e.g. হ্যালো)">
+    </div>
+    
+    <div id="dict-result" style="display: none; padding: 15px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); margin-bottom: 15px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div id="dict-icon" style="width: 30px; height: 30px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center;">?</div>
+            <div>
+                <div id="dict-status-text" style="font-size: 12px; font-weight: 700; color: var(--text-primary);">Searching...</div>
+                <div id="dict-word-display" class="bangla-font" style="font-size: 10px; color: var(--text-secondary);"></div>
+            </div>
+        </div>
+        <button id="dict-add-btn" class="btn btn-primary" style="width: 100%; margin-top: 10px; display: none;" onclick="scManualAddWord()">Add to Dictionary</button>
+    </div>
+  </div>
+</div>
 
-                if (data.exists) {
-                    dictStatusText.textContent = "Word Found in Dictionary";
-                    dictStatusText.className = "font-bold text-green-700 text-sm";
-                    dictIcon.className = "w-8 h-8 rounded-full flex items-center justify-center bg-green-100 text-green-600";
-                    dictIcon.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
-                } else {
-                    dictStatusText.textContent = "Word Not Found";
-                    dictStatusText.className = "font-bold text-amber-700 text-sm";
-                    dictIcon.className = "w-8 h-8 rounded-full flex items-center justify-center bg-amber-100 text-amber-600";
-                    dictIcon.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
-                    
-                    modalAddBtn.classList.remove('hidden');
-                    modalAddBtn.onclick = () => manualAddWord(word);
-                }
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-            } catch (err) {
-                console.error(err);
-                dictStatusText.textContent = "Error checking dictionary";
-            }
-        }
+  // APP STATE
+  let db = null;
+  let auth = null;
+  let currentUser = null;
+  let isDemoMode = false;
+  
+  // Auth state
+  let isAdmin = false; 
+  let isContributor = false;
+  let contributorData = { name: '', email: '' };
 
-        async function manualAddWord(word) {
-            const originalText = modalAddBtn.textContent;
-            modalAddBtn.textContent = "Adding...";
-            modalAddBtn.disabled = true;
+  let data = { words: [], sentences: [], requests: [] };
 
-            try {
-                const response = await fetch('/api/add_word', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ word: word })
-                });
+  let currentView = 'dictionary';
+  let inputMode = 'bulk'; // bulk | single
+  let entryType = 'word'; // word | sentence
+  let exportType = 'word'; // word | sentence
+  let contribTab = 'word'; // word | sentence
+  
+  let filters = {
+    dict: { pos: 'All', cat: 'All', trans: 'All', review: 'All' },
+    sent: { trans: 'All', review: 'All' }
+  };
+  
+  let unsubscribeWords, unsubscribeSentences, unsubscribeRequests;
 
-                if (response.ok) {
-                    modalAddBtn.textContent = "Added Successfully!";
-                    modalAddBtn.classList.replace('bg-teal-600', 'bg-green-600');
-                    modalAddBtn.classList.replace('hover:bg-teal-700', 'hover:bg-green-700');
-                    setTimeout(() => {
-                        searchDictionary(word); // Re-check to show "Found" state
-                    }, 1000);
-                } else {
-                    alert("Failed to add word.");
-                    modalAddBtn.textContent = originalText;
-                    modalAddBtn.disabled = false;
-                }
-            } catch (err) {
-                alert("Connection error.");
-                modalAddBtn.textContent = originalText;
-                modalAddBtn.disabled = false;
-            }
-        }
+  // DEMO DATA (Fallback)
+  const DEMO_WORDS = [
+    { id: '1', bangla: 'ভাষা', banglish: 'Bhasha', english: 'Language', pos: 'Noun', category: 'General', contributorName: 'System' },
+    { id: '2', bangla: 'সূর্য', banglish: 'Surjo', english: 'Sun', pos: 'Noun', category: 'Astronomy', contributorName: 'System' },
+    { id: '3', bangla: 'খাওয়া', banglish: 'Khaoa', english: 'To eat', pos: 'Verb', category: 'General', contributorName: 'System' },
+    { id: '4', bangla: 'সুন্দর', banglish: 'Shundor', english: 'Beautiful', pos: 'Adjective', category: 'Nature', contributorName: 'System' },
+    { id: '5', bangla: 'কম্পিউটার', banglish: 'Computer', english: 'Computer', pos: 'Noun', category: 'Science', contributorName: 'User A' }
+  ];
+  
+  const DEMO_SENTENCES = [
+    { id: '1', bangla: 'বাংলা আমার মাতৃভাষা।', english: 'Bengali is my mother tongue.', source: 'Common Phrase', contributorName: 'System' },
+    { id: '2', bangla: 'প্রোগ্রামিং একটি মজার জিনিস।', english: 'Programming is a fun thing.', source: 'Tech Blog', contributorName: 'User B' }
+  ];
 
-        // --- Core Event Listeners ---
+  const statusDot = document.getElementById('db-status-dot');
+  const statusText = document.getElementById('db-status-text');
+  
+  // INIT FIREBASE
+  async function initApp() {
+    try {
+      if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
         
-        inputText.addEventListener('input', () => {
-            clearTimeout(typingTimer);
-            updateWordCount();
-            statusMsg.textContent = "Typing...";
-            typingStatus.classList.add('hidden');
-            
-            if (inputText.value.trim().length > 0) {
-                typingTimer = setTimeout(checkGrammar, DONE_TYPING_INTERVAL);
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            currentUser = user;
+            statusDot.classList.add('online');
+            statusText.innerText = 'Connected';
+            attachListeners();
+          }
+        });
+      } else {
+        throw new Error("No config");
+      }
+    } catch (e) {
+      console.warn("Demo Mode Active:", e.message);
+      isDemoMode = true;
+      statusDot.style.background = '#e67e22';
+      statusDot.style.boxShadow = '0 0 8px #e67e22';
+      statusText.innerText = 'Demo Mode (Local)';
+      data.words = [...DEMO_WORDS];
+      data.sentences = [...DEMO_SENTENCES];
+      renderAll();
+    }
+  }
+
+  function getAppId() { return typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; }
+
+  function attachListeners() {
+    if (!currentUser || isDemoMode) return;
+    const appId = getAppId();
+    const wordsRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'words');
+    const sentencesRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'sentences');
+    const requestsRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'requests');
+
+    unsubscribeWords = onSnapshot(wordsRef, (snap) => {
+      data.words = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      updateStats();
+      if(currentView === 'dictionary' || currentView === 'analytics') renderView();
+    }, e => console.error(e));
+
+    unsubscribeSentences = onSnapshot(sentencesRef, (snap) => {
+      data.sentences = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      updateStats();
+      if(currentView === 'sentences' || currentView === 'analytics') renderView();
+    }, e => console.error(e));
+
+    unsubscribeRequests = onSnapshot(requestsRef, (snap) => {
+      data.requests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      updateStats();
+      if(currentView === 'requests') renderView();
+      
+      const wordReqs = data.requests.filter(r => r.type === 'word').length;
+      const sentReqs = data.requests.filter(r => r.type === 'sentence').length;
+      document.getElementById('badge-word-reqs').innerText = wordReqs;
+      document.getElementById('badge-sent-reqs').innerText = sentReqs;
+
+      const navItem = document.querySelector('.nav-item[data-view="requests"]');
+      data.requests.length > 0 ? navItem.classList.add('has-requests') : navItem.classList.remove('has-requests');
+    }, e => console.error(e));
+  }
+
+  // RENDERING
+  function renderAll() { updateStats(); renderView(); }
+  function updateStats() {
+    document.getElementById('stat-words').innerText = data.words.length;
+    document.getElementById('stat-sentences').innerText = data.sentences.length;
+    document.getElementById('stat-requests').innerText = data.requests.length;
+  }
+
+  window.switchView = (viewName) => {
+    currentView = viewName;
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    let navIcon = document.querySelector(`.nav-item[data-view="${viewName}"]`);
+    if(navIcon) navIcon.classList.add('active');
+    
+    document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+    document.getElementById(`view-${viewName}`).classList.add('active');
+    renderView();
+  };
+
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => switchView(item.dataset.view));
+  });
+
+  function renderView() {
+    if (currentView === 'dictionary') renderDictionary();
+    if (currentView === 'sentences') renderSentences();
+    if (currentView === 'analytics') renderAnalytics();
+    if (currentView === 'requests') renderRequests();
+  }
+
+  // Icons for rendering
+  const verifiedIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+  const translateIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>`;
+  const globeIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>`;
+  const userIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+
+  function renderDictionary() {
+    const container = document.getElementById('dictionary-list');
+    
+    let filtered = data.words.filter(w => {
+      if(filters.dict.pos !== 'All' && w.pos !== filters.dict.pos) return false;
+      if(filters.dict.cat !== 'All' && w.category !== filters.dict.cat) return false;
+      if(filters.dict.trans === 'Translated' && !w.english) return false;
+      if(filters.dict.trans === 'Missing Translation' && w.english) return false;
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty-state">No words match the current filters. Switch to Input Processor to add some.</div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map((w, index) => `
+      <div class="rich-card">
+        <div class="rc-title-row">
+          <div class="rc-title">${escapeHtml(w.bangla)} ${verifiedIcon}</div>
+          <div class="rc-views">${150 + index} Views</div>
+        </div>
+        <div class="rc-translation">${translateIcon} ${escapeHtml(w.english || 'No Translation')}</div>
+        <div class="rc-tags">
+          <div class="rc-tag tag-pos">${escapeHtml(w.pos || 'Unknown')}</div>
+          <div class="rc-tag tag-cat">🏷️ ${escapeHtml(w.category || 'General')}</div>
+          ${w.banglish ? `<div class="rc-tag tag-banglish">${escapeHtml(w.banglish)}</div>` : ''}
+        </div>
+        <div class="rc-footer">
+          <div class="rc-meta-item">${globeIcon} ${escapeHtml(w.source || 'Wikipedia')}</div>
+          <div style="display:flex; align-items:center; gap: 10px;">
+            <span>Contributed by: ${escapeHtml(w.contributorName || 'Admin')}</span>
+            ${isAdmin ? `<button class="btn btn-primary" onclick="deleteItem('words', '${w.id}')" style="padding: 4px 8px; font-size:9px;">Delete</button>` : ``}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderSentences() {
+    const container = document.getElementById('sentences-list');
+    
+    let filtered = data.sentences.filter(s => {
+      if(filters.sent.trans === 'Translated' && !s.english) return false;
+      if(filters.sent.trans === 'Missing Translation' && s.english) return false;
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="empty-state">No sentences match current filters.</div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(s => `
+      <div class="rich-card">
+        <div class="rc-title" style="font-size: 20px; margin-bottom: 8px;">${escapeHtml(s.bangla)}</div>
+        <div class="rc-translation" style="margin-bottom: 20px;">${escapeHtml(s.english || 'No translation')}</div>
+        <div class="rc-footer">
+          <div class="rc-meta-item">${globeIcon} Source: ${escapeHtml(s.source || 'Unknown')}</div>
+          <div style="display:flex; align-items:center; gap: 10px;">
+            <span>By: ${escapeHtml(s.contributorName || 'System')}</span>
+            ${isAdmin ? `<button class="btn btn-primary" onclick="deleteItem('sentences', '${s.id}')" style="padding: 4px 8px; font-size:9px;">Delete</button>` : ``}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // --- ANALYTICS CHARTS GENERATION ---
+
+  function createDonutHTML(entries, colors) {
+    const total = entries.reduce((sum, item) => sum + item.value, 0);
+    if(total === 0) return `<div class="empty-state">Not enough data.</div>`;
+    
+    let gradientStops = [];
+    let currentAngle = 0;
+    let legendHtml = '';
+    
+    entries.forEach((item, i) => {
+      let percentage = (item.value / total) * 100;
+      let nextAngle = currentAngle + percentage;
+      let color = colors[i % colors.length];
+      gradientStops.push(`${color} ${currentAngle}% ${nextAngle}%`);
+      legendHtml += `<div class="legend-item"><div class="legend-dot" style="background:${color}"></div>${escapeHtml(item.label)}</div>`;
+      currentAngle = nextAngle;
+    });
+    
+    return `
+      <div class="donut-container">
+        <div class="donut-hole" style="background: conic-gradient(${gradientStops.join(', ')});"></div>
+        <div class="donut-legend">${legendHtml}</div>
+      </div>
+    `;
+  }
+
+  function renderAnalytics() {
+    // 1. Calculate Stats based on current data
+    const totalWords = data.words.length;
+    const totalSentences = data.sentences.length;
+    
+    const translatedWordsCount = data.words.filter(w => w.english && w.english.trim() !== '').length;
+    const translatedWordsPct = totalWords > 0 ? Math.round((translatedWordsCount / totalWords) * 100) : 0;
+    const reviewedWordsPct = totalWords > 0 ? 100 : 0; // Mocked as 100% since we assume dictionary words are approved
+
+    document.getElementById('stat-dash-words').innerText = totalWords;
+    document.getElementById('stat-dash-sentences').innerText = totalSentences;
+    document.getElementById('stat-dash-reviewed').innerText = reviewedWordsPct + '%';
+    document.getElementById('stat-dash-translated').innerText = translatedWordsPct + '%';
+
+    // 2. Prepare Data Dictionaries
+    const posCounts = { 'Noun':0, 'Verb':0, 'Adjective':0, 'Adverb':0, 'Pronoun':0 };
+    const catCounts = {};
+    const contribCounts = {};
+    
+    data.words.forEach(w => {
+      let pos = w.pos || 'Unknown';
+      if(posCounts[pos] !== undefined) posCounts[pos]++;
+      else posCounts[pos] = 1;
+      
+      let cat = w.category || 'General';
+      catCounts[cat] = (catCounts[cat] || 0) + 1;
+    });
+
+    [...data.words, ...data.sentences].forEach(item => {
+      let name = item.contributorName || 'System';
+      contribCounts[name] = (contribCounts[name] || 0) + 1;
+    });
+
+    // 3. Tab: Overview (Categories Donut)
+    const catEntries = Object.entries(catCounts).sort((a,b) => b[1] - a[1]).slice(0, 5).map(e => ({label: e[0], value: e[1]}));
+    const catColors = ['#f97316', '#3b82f6', '#8b5cf6', '#2dd4bf', '#eab308'];
+    document.getElementById('dash-cat-chart').innerHTML = createDonutHTML(catEntries, catColors);
+
+    // 4. Tab: Overview (POS Radar Chart)
+    const posContainer = document.getElementById('dash-pos-chart');
+    const posKeys = ['Noun', 'Verb', 'Adjective', 'Adverb', 'Pronoun'];
+    const posValues = posKeys.map(k => posCounts[k] || 0);
+    const maxVal = Math.max(...posValues, 5);
+    const size = 260, center = size / 2, radius = 80, angleStep = (Math.PI * 2) / posKeys.length;
+    
+    let svg = `<svg width="100%" height="240" viewBox="0 0 ${size} ${size}">`;
+    [0.25, 0.5, 0.75, 1].forEach(scale => {
+      let points = posKeys.map((_, i) => {
+        let a = i * angleStep - Math.PI / 2;
+        return `${center + Math.cos(a) * radius * scale},${center + Math.sin(a) * radius * scale}`;
+      }).join(' ');
+      svg += `<polygon points="${points}" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1" />`;
+    });
+    posKeys.forEach((key, i) => {
+      let a = i * angleStep - Math.PI / 2;
+      let x = center + Math.cos(a) * radius, y = center + Math.sin(a) * radius;
+      let lx = center + Math.cos(a) * (radius + 25), ly = center + Math.sin(a) * (radius + 15);
+      svg += `<line x1="${center}" y1="${center}" x2="${x}" y2="${y}" stroke="rgba(255,255,255,0.15)" stroke-width="1" />`;
+      svg += `<text x="${lx}" y="${ly}" fill="var(--text-secondary)" font-size="10" text-anchor="middle" dominant-baseline="middle">${key}</text>`;
+    });
+    let dataPoints = posKeys.map((_, i) => {
+      let a = i * angleStep - Math.PI / 2;
+      let valScale = posValues[i] / maxVal;
+      return `${center + Math.cos(a) * radius * valScale},${center + Math.sin(a) * radius * valScale}`;
+    }).join(' ');
+    svg += `<polygon points="${dataPoints}" fill="rgba(139, 92, 246, 0.4)" stroke="#8b5cf6" stroke-width="2" />`;
+    svg += `</svg>`;
+    posContainer.innerHTML = svg;
+
+    // 5. Tab: Growth Trends (Mock SVG Line Chart)
+    const gContainer = document.getElementById('dash-growth-chart');
+    // Mock scaling values
+    const gwMaxY = Math.max(totalWords, 10);
+    const gsMaxY = Math.max(totalSentences, 10);
+    const gH = 200, gW = 600;
+    
+    // Polyline points mapping (6 abstract timeline points)
+    const ptsWords = `0,${gH} 120,${gH-20} 240,${gH-30} 360,${gH-40} 480,${gH-60} ${gW},${gH - (totalWords/gwMaxY)*gH}`;
+    const ptsSentences = `0,${gH} 120,${gH-5} 240,${gH-10} 360,${gH-15} 480,${gH-20} ${gW},${gH - (totalSentences/gsMaxY)*gH}`;
+
+    gContainer.innerHTML = `
+      <svg width="100%" height="100%" viewBox="0 0 ${gW} ${gH}" preserveAspectRatio="none" style="overflow:visible;">
+        <line x1="0" y1="${gH}" x2="${gW}" y2="${gH}" stroke="rgba(255,255,255,0.2)" stroke-width="2" />
+        <line x1="0" y1="0" x2="0" y2="${gH}" stroke="rgba(255,255,255,0.2)" stroke-width="2" />
+        <polyline points="${ptsWords}" fill="none" stroke="#2dd4bf" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <polyline points="${ptsSentences}" fill="none" stroke="#8b5cf6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="${gW}" cy="${gH - (totalWords/gwMaxY)*gH}" r="6" fill="#2dd4bf" />
+        <circle cx="${gW}" cy="${gH - (totalSentences/gsMaxY)*gH}" r="6" fill="#8b5cf6" />
+      </svg>
+    `;
+
+    // 6. Tab: Contributors (Horizontal Bar Chart)
+    const contribContainer = document.getElementById('dash-contrib-chart');
+    const contribEntries = Object.entries(contribCounts).sort((a,b) => b[1] - a[1]).map(e => ({label: e[0], value: e[1]}));
+    const maxContrib = Math.max(...contribEntries.map(e => e.value), 1);
+    const contribColors = ['#2dd4bf', '#8b5cf6', '#eab308', '#ef4444', '#3b82f6'];
+    
+    let contribHtml = '<div style="display:flex; flex-direction:column; gap:16px;">';
+    contribEntries.forEach((item, i) => {
+       let wPct = (item.value / maxContrib) * 100;
+       let color = contribColors[i % contribColors.length];
+       contribHtml += `
+         <div style="display:flex; align-items:center; gap:16px;">
+           <div style="width:100px; text-align:right; font-size:11px; color:var(--text-secondary); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${escapeHtml(item.label)}</div>
+           <div style="flex:1; height:24px; background:var(--surface); border-radius:4px; overflow:hidden; position:relative;">
+             <div style="width:${wPct}%; height:100%; background:${color}; border-radius:4px;"></div>
+           </div>
+           <div style="width:20px; font-size:11px; font-weight:700;">${item.value}</div>
+         </div>
+       `;
+    });
+    contribHtml += '</div>';
+    contribContainer.innerHTML = contribEntries.length ? contribHtml : `<div class="empty-state">No contributors yet.</div>`;
+
+    // 7. Tab: Content Health
+    const reviewData = [
+      {label: 'Reviewed', value: totalWords}, 
+      {label: 'Unreviewed', value: 0} // Hardcoded 0 for DB words per schema logic
+    ];
+    document.getElementById('dash-review-chart').innerHTML = createDonutHTML(reviewData, ['#22c55e', '#ef4444']);
+
+    const transData = [
+      {label: 'Translated', value: translatedWordsCount}, 
+      {label: 'Untranslated', value: totalWords - translatedWordsCount}
+    ];
+    document.getElementById('dash-trans-chart').innerHTML = createDonutHTML(transData, ['#8b5cf6', '#eab308']);
+  }
+
+  // --- END CHARTS ---
+
+  window.switchAnalyticsTab = (tabId) => {
+    // Toggles for Analytics Navigation
+    document.querySelectorAll('.atab').forEach(el => el.classList.remove('active'));
+    document.querySelector(`.atab[data-atab="${tabId}"]`).classList.add('active');
+    
+    document.querySelectorAll('.analytics-panel').forEach(el => el.classList.remove('active'));
+    document.getElementById(`tab-${tabId}`).classList.add('active');
+  };
+
+  function renderRequests() {
+    const container = document.getElementById('requests-list');
+    
+    const filteredReqs = data.requests.filter(r => r.type === contribTab);
+
+    if (filteredReqs.length === 0) {
+      container.innerHTML = `<div class="empty-state">No pending ${contribTab} contributions to review.</div>`;
+      return;
+    }
+    
+    container.innerHTML = filteredReqs.map(r => {
+      const isWord = r.type === 'word';
+      const pillClass = isWord ? 'UPDATE' : 'NEW SENTENCE';
+      const dateStr = new Date(parseInt(r.id)).toLocaleDateString() || 'Recently';
+      
+      let diffHtml = '';
+      if (isWord) {
+        diffHtml = `
+          <div class="req-diff">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div class="diff-label">Original</div>
+                <div style="font-size: 18px; font-family: 'Noto Serif Bengali'; margin-bottom:4px;">${escapeHtml(r.data.bangla)}</div>
+                <div style="color: var(--text-secondary); font-size: 11px;">${escapeHtml(r.data.english)}</div>
+              </div>
+              <div style="color: var(--text-muted);">➔</div>
+              <div style="text-align: right;">
+                <div class="diff-label suggested">Suggested</div>
+                <div style="font-size: 22px; font-family: 'Noto Serif Bengali'; font-weight:700; margin-bottom:4px;">${escapeHtml(r.data.bangla)}</div>
+                <div style="color: var(--accent); font-size: 12px;">${escapeHtml(r.data.english)}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        diffHtml = `
+          <div class="req-diff">
+            <div style="font-size: 20px; font-family: 'Noto Serif Bengali'; font-weight:700; margin-bottom:12px;">${escapeHtml(r.data.bangla)}</div>
+            <div style="border-left: 2px solid var(--accent); padding-left: 12px; font-size: 14px; font-style: italic; color: var(--text-secondary);">
+              ${escapeHtml(r.data.english)}
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="req-card type-${r.type}">
+          <div class="req-meta">
+            <span class="req-pill blue">${pillClass}</span>
+            <span style="display:flex; align-items:center; gap:4px; background:var(--surface); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border);">${userIcon} ${escapeHtml(r.data.contributorName || 'Anon')}</span>
+            <span style="display:flex; align-items:center; gap:4px;">🕒 ${dateStr}</span>
+          </div>
+          
+          ${diffHtml}
+
+          <div class="req-actions">
+            ${isAdmin ? `
+              <button class="btn btn-primary" onclick="rejectRequest('${r.id}')">Reject</button>
+              <button class="btn btn-primary" onclick="approveRequest('${r.id}')">Approve</button>
+            ` : `<span style="color:var(--text-muted); font-size:10px;">Awaiting Admin Approval</span>`}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // UI / TOGGLES
+  window.updateFilters = (type) => {
+    if (type === 'dict') {
+      filters.dict.pos = document.getElementById('filt-dict-pos').value;
+      filters.dict.cat = document.getElementById('filt-dict-cat').value;
+      filters.dict.trans = document.getElementById('filt-dict-trans').value;
+      filters.dict.review = document.getElementById('filt-dict-review').value;
+    } else {
+      filters.sent.trans = document.getElementById('filt-sent-trans').value;
+      filters.sent.review = document.getElementById('filt-sent-review').value;
+    }
+    renderView();
+  };
+
+  window.resetFilters = (type) => {
+    if (type === 'dict') {
+      document.getElementById('filt-dict-pos').value = 'All';
+      document.getElementById('filt-dict-cat').value = 'All';
+      document.getElementById('filt-dict-trans').value = 'All';
+      document.getElementById('filt-dict-review').value = 'All';
+      filters.dict = { pos: 'All', cat: 'All', trans: 'All', review: 'All' };
+    } else {
+      document.getElementById('filt-sent-trans').value = 'All';
+      document.getElementById('filt-sent-review').value = 'All';
+      filters.sent = { trans: 'All', review: 'All' };
+    }
+    renderView();
+  };
+
+  window.setContribTab = (tab) => {
+    contribTab = tab;
+    document.getElementById('btn-contrib-word').classList.toggle('active', tab === 'word');
+    document.getElementById('btn-contrib-sentence').classList.toggle('active', tab === 'sentence');
+    renderRequests();
+  };
+
+  window.setInputMode = (mode) => {
+    inputMode = mode;
+    document.getElementById('btn-mode-bulk').classList.toggle('active', mode === 'bulk');
+    document.getElementById('btn-mode-single').classList.toggle('active', mode === 'single');
+    document.getElementById('mode-bulk').style.display = mode === 'bulk' ? 'block' : 'none';
+    document.getElementById('mode-single').style.display = mode === 'single' ? 'block' : 'none';
+  };
+
+  window.setEntryType = (type) => {
+    entryType = type;
+    document.getElementById('btn-type-word').classList.toggle('active', type === 'word');
+    document.getElementById('btn-type-sentence').classList.toggle('active', type === 'sentence');
+    document.getElementById('form-word').style.display = type === 'word' ? 'block' : 'none';
+    document.getElementById('form-sentence').style.display = type === 'sentence' ? 'block' : 'none';
+  };
+
+  window.setExportType = (type) => {
+    exportType = type;
+    document.getElementById('btn-export-word').classList.toggle('active', type === 'word');
+    document.getElementById('btn-export-sentence').classList.toggle('active', type === 'sentence');
+  };
+
+  // MOCK AI TRANSLATION
+  window.triggerAITranslate = (type) => {
+    let sourceInput = type === 'word' ? document.getElementById('inp-w-bn') : document.getElementById('inp-s-bn');
+    let targetInput = type === 'word' ? document.getElementById('inp-w-en') : document.getElementById('inp-s-en');
+    let banglishInput = document.getElementById('inp-w-banglish');
+    
+    if(!sourceInput.value.trim()) { alert("Please enter Bangla text first."); return; }
+    
+    targetInput.value = "Translating... 🤖✨";
+    
+    // Simulate API delay
+    setTimeout(() => {
+      if(type === 'word') {
+        targetInput.value = "[AI Translation Result]";
+        if(!banglishInput.value) banglishInput.value = "[AI Romanization]";
+      } else {
+        targetInput.value = "[AI Sentence Translation Result].";
+      }
+    }, 800);
+  };
+
+  // DATA ENTRY LOGIC
+  window.handleSubmitEntry = async () => {
+    if (!isAdmin && !isContributor) {
+      alert("Please log in as a Contributor or Admin to add entries.");
+      window.openLoginModal();
+      return;
+    }
+
+    let payload = null;
+    let collectionName = '';
+
+    // Meta details using active login state instead of manual form
+    const meta = {
+      contributorName: isAdmin ? 'Admin' : contributorData.name,
+      contributorEmail: isAdmin ? '' : contributorData.email,
+      author: document.getElementById('inp-sc-author').value || 'Unknown',
+      source: document.getElementById('inp-sc-source').value || 'Unknown',
+      category: document.getElementById('inp-sc-category').value || 'General'
+    };
+
+    if (entryType === 'word') {
+      const bn = document.getElementById('inp-w-bn').value.trim();
+      const en = document.getElementById('inp-w-en').value.trim();
+      const pos = document.getElementById('inp-w-pos').value || 'Noun';
+      const banglish = document.getElementById('inp-w-banglish').value.trim();
+      if (!bn || !en) return alert("Bangla Word and Translation are required.");
+      
+      payload = { type: 'word', data: { bangla: bn, banglish: banglish, english: en, pos: pos, ...meta } };
+      collectionName = 'words';
+    } else {
+      const bn = document.getElementById('inp-s-bn').value.trim();
+      const en = document.getElementById('inp-s-en').value.trim();
+      if (!bn || !en) return alert("Sentence and Translation are required.");
+      
+      payload = { type: 'sentence', data: { bangla: bn, english: en, ...meta } };
+      collectionName = 'sentences';
+    }
+
+    try {
+      if (isDemoMode) {
+        if (isAdmin) {
+          payload.data.id = Date.now().toString();
+          data[collectionName].push(payload.data);
+        } else {
+          payload.id = Date.now().toString();
+          data.requests.push(payload);
+        }
+        renderAll();
+      } else {
+        const targetCollection = isAdmin ? collectionName : 'requests';
+        const ref = collection(db, 'artifacts', getAppId(), 'users', currentUser.uid, targetCollection);
+        if (isAdmin) await addDoc(ref, payload.data);
+        else await addDoc(ref, { type: payload.type, action: 'add', data: payload.data, status: 'pending' });
+      }
+      
+      // Clear specific text inputs but leave meta for ease of entry
+      document.getElementById('inp-w-bn').value = '';
+      document.getElementById('inp-w-en').value = '';
+      document.getElementById('inp-w-banglish').value = '';
+      document.getElementById('inp-s-bn').value = '';
+      document.getElementById('inp-s-en').value = '';
+      
+      alert(isAdmin ? "Added successfully!" : "Request submitted for admin approval.");
+    } catch (e) { alert("Error saving entry."); }
+  };
+
+  // BULK EXTRACTION MOCKS
+  window.handleExtract = (type) => {
+    const text = document.getElementById('inp-bulk-text').value;
+    if(!text) return alert("Please paste some text first.");
+    const autoTranslate = document.getElementById('inp-bulk-auto-translate').checked;
+    const source = document.getElementById('inp-sc-source').value || 'Unknown';
+    alert(`Mock: Extracted ${type} from text. \nSource: ${source}\nAuto-Translate: ${autoTranslate ? 'Enabled' : 'Disabled'}\n(In a full app, this would process the text and populate the database or a review table)`);
+  };
+
+  // EXPORT / IMPORT LOGIC
+  window.exportData = (format) => {
+    const exportDataArray = exportType === 'word' ? data.words : data.sentences;
+    if(exportDataArray.length === 0) return alert("No data to export.");
+    
+    let content = "";
+    let mime = "";
+    let filename = `borno_${exportType}s.${format}`;
+
+    if(format === 'json') {
+      content = JSON.stringify(exportDataArray, null, 2);
+      mime = "application/json";
+    } else {
+      // Basic CSV/XLS generation
+      const keys = Object.keys(exportDataArray[0]).filter(k => k !== 'id');
+      content = keys.join(",") + "\n";
+      exportDataArray.forEach(obj => {
+        content += keys.map(k => `"${(obj[k]||'').toString().replace(/"/g, '""')}"`).join(",") + "\n";
+      });
+      mime = format === 'csv' ? "text/csv" : "application/vnd.ms-excel";
+    }
+
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  window.handleImportCSV = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    alert(`Mock: Imported ${file.name}. (A parser would read this and trigger handleSubmitEntry loop).`);
+    e.target.value = ''; // reset
+  };
+
+  // AUTH LOGIC (Admin & Contributor)
+  window.openLoginModal = () => document.getElementById('login-modal').classList.add('active');
+  window.closeModals = () => { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); document.getElementById('login-error').style.display = 'none'; };
+
+  window.switchAuthTab = (tab) => {
+    document.getElementById('tab-auth-contrib').classList.toggle('active', tab === 'contrib');
+    document.getElementById('tab-auth-admin').classList.toggle('active', tab === 'admin');
+    document.getElementById('auth-form-contrib').style.display = tab === 'contrib' ? 'block' : 'none';
+    document.getElementById('auth-form-admin').style.display = tab === 'admin' ? 'block' : 'none';
+    document.getElementById('login-error').style.display = 'none';
+  };
+
+  window.handleContribAuth = () => {
+    const name = document.getElementById('auth-name').value.trim();
+    const email = document.getElementById('auth-email').value.trim();
+    if(!name || !email) {
+      document.getElementById('login-error').innerText = "Full Name and Email are required.";
+      document.getElementById('login-error').style.display = 'block';
+      return;
+    }
+    
+    isContributor = true;
+    isAdmin = false;
+    contributorData = { name, email };
+    
+    const dot = document.getElementById('admin-dot');
+    dot.classList.add('active');
+    dot.style.background = 'var(--success)';
+    dot.style.boxShadow = '0 0 5px var(--success)';
+    
+    document.getElementById('admin-text').innerText = `Contributor: ${name}`;
+    document.getElementById('admin-text').style.color = 'var(--success)';
+    document.getElementById('login-btn').innerText = 'Logout';
+    document.getElementById('login-btn').onclick = window.handleLogout;
+    
+    document.getElementById('submit-notice').innerText = 'Logged in as Contributor. Submissions go to Pending queue.';
+    document.getElementById('submit-notice').style.color = 'var(--success)';
+    
+    closeModals(); 
+    renderView();
+  };
+
+  window.handleAdminLogin = () => {
+    const code = document.getElementById('admin-passcode').value;
+    if (code === 'admin123' || code === 'borno') { 
+      isAdmin = true;
+      isContributor = false;
+      
+      const dot = document.getElementById('admin-dot');
+      dot.classList.add('active');
+      dot.style.background = 'var(--accent)';
+      dot.style.boxShadow = '0 0 5px var(--accent)';
+      
+      document.getElementById('admin-text').innerText = 'Admin Mode';
+      document.getElementById('admin-text').style.color = 'var(--accent)';
+      document.getElementById('login-btn').innerText = 'Logout';
+      document.getElementById('login-btn').onclick = window.handleLogout;
+      
+      document.getElementById('submit-notice').innerText = 'Admin Mode: Entries saved directly to DB.';
+      document.getElementById('submit-notice').style.color = 'var(--accent)';
+      
+      closeModals(); 
+      renderView();
+    } else { 
+      document.getElementById('login-error').innerText = "Invalid Admin Passcode.";
+      document.getElementById('login-error').style.display = 'block'; 
+    }
+  };
+
+  window.handleLogout = () => {
+    isAdmin = false;
+    isContributor = false;
+    contributorData = { name: '', email: '' };
+    
+    const dot = document.getElementById('admin-dot');
+    dot.classList.remove('active');
+    dot.style.background = 'var(--text-muted)';
+    dot.style.boxShadow = 'none';
+    
+    document.getElementById('admin-text').innerText = 'Guest Mode';
+    document.getElementById('admin-text').style.color = 'var(--text-secondary)';
+    document.getElementById('login-btn').innerText = 'Login / Register';
+    document.getElementById('login-btn').onclick = window.openLoginModal;
+    
+    document.getElementById('submit-notice').innerText = 'Please log in to submit entries.';
+    document.getElementById('submit-notice').style.color = 'var(--danger)';
+    
+    // Clear inputs
+    document.getElementById('auth-name').value = '';
+    document.getElementById('auth-email').value = '';
+    document.getElementById('admin-passcode').value = '';
+    
+    renderView();
+  };
+
+  window.approveRequest = async (id) => {
+    if (!isAdmin) return;
+    const req = data.requests.find(r => r.id === id);
+    if (!req) return;
+    try {
+      if (isDemoMode) {
+        req.data.id = Date.now().toString();
+        req.type === 'word' ? data.words.push(req.data) : data.sentences.push(req.data);
+        data.requests = data.requests.filter(r => r.id !== id);
+        renderAll();
+      } else {
+        const targetCol = req.type === 'word' ? 'words' : 'sentences';
+        const targetRef = collection(db, 'artifacts', getAppId(), 'users', currentUser.uid, targetCol);
+        await addDoc(targetRef, req.data);
+        const reqRef = doc(db, 'artifacts', getAppId(), 'users', currentUser.uid, 'requests', id);
+        await deleteDoc(reqRef);
+      }
+    } catch(e) { console.error(e); }
+  };
+
+  window.rejectRequest = async (id) => {
+    if (!isAdmin) return;
+    try {
+      if (isDemoMode) { data.requests = data.requests.filter(r => r.id !== id); renderAll(); } 
+      else { const reqRef = doc(db, 'artifacts', getAppId(), 'users', currentUser.uid, 'requests', id); await deleteDoc(reqRef); }
+    } catch(e) { console.error(e); }
+  };
+
+  window.deleteItem = async (col, id) => {
+    if (!isAdmin) return;
+    try {
+      if (isDemoMode) { data[col] = data[col].filter(item => item.id !== id); renderAll(); } 
+      else { const ref = doc(db, 'artifacts', getAppId(), 'users', currentUser.uid, col, id); await deleteDoc(ref); }
+    } catch(e) { console.error(e); }
+  };
+
+  function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  // --- SPELL CHECKER LOGIC ---
+  
+  let scTimer;
+  let scLatestCorrectedText = "";
+  const scInput = document.getElementById('sc-input');
+  const scOutput = document.getElementById('sc-output');
+  const scTooltip = document.getElementById('sc-tooltip');
+  const scStatus = document.getElementById('sc-status-msg');
+
+  window.scResetEditor = () => {
+    scInput.value = '';
+    scOutput.innerHTML = '';
+    scOutput.style.display = 'none';
+    scInput.style.display = 'block';
+    scInput.focus();
+    document.getElementById('sc-word-count').innerText = '0 words';
+    scStatus.innerText = 'Ready';
+    document.getElementById('sc-fix-all-btn').style.display = 'none';
+    scLatestCorrectedText = '';
+  };
+
+  window.scCopyText = () => {
+    const text = scInput.style.display === 'none' ? scOutput.innerText : scInput.value;
+    navigator.clipboard.writeText(text);
+    scStatus.innerText = "Copied to clipboard!";
+    setTimeout(() => scStatus.innerText = "Ready", 2000);
+  };
+
+  scInput.addEventListener('input', () => {
+    clearTimeout(scTimer);
+    const words = scInput.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+    document.getElementById('sc-word-count').innerText = `${words} words`;
+    scStatus.innerText = "Typing...";
+    
+    if(scInput.value.trim().length > 0) {
+        scTimer = setTimeout(scCheckGrammar, 1000);
+    } else {
+        scStatus.innerText = "Ready";
+        document.getElementById('sc-fix-all-btn').style.display = 'none';
+    }
+  });
+
+  async function scCheckGrammar() {
+    const text = scInput.value;
+    if (!text.trim()) return;
+    scStatus.innerText = "Analyzing...";
+    
+    // MOCK API CALL for Demo
+    try {
+        // In a real app, fetch('/api/check', ...)
+        // For this demo, we'll simulate a response
+        await new Promise(r => setTimeout(r, 600)); 
+        
+        // Simulate: Find 'bhul' and suggest 'bhalo' logic roughly
+        // Just for demo visualization, let's mark random words if english-ish or simple logic
+        // Or assume the user wants the UI to work. I will implement a dummy response generator.
+        
+        const tokens = text.split(/(\s+)/).map(t => {
+            if (t.trim().length > 3 && Math.random() > 0.7) {
+                return { type: 'error', word: t, suggestions: ['সঠিক', 'শব্দ'] };
+            }
+            return { type: 'text', word: t };
+        });
+
+        // Construct output
+        scInput.style.display = 'none';
+        scOutput.style.display = 'block';
+        scOutput.innerHTML = '';
+        
+        tokens.forEach(token => {
+            if (token.type === 'error') {
+                const span = document.createElement('span');
+                span.textContent = token.word;
+                span.className = 'error-highlight';
+                span.onclick = (e) => scShowTooltip(e, span, token.suggestions, token.word);
+                scOutput.appendChild(span);
             } else {
-                statusMsg.textContent = "Ready";
-                fixAllBtn.classList.add('hidden');
+                scOutput.appendChild(document.createTextNode(token.word));
             }
         });
 
-        function updateWordCount() {
-            const words = inputText.value.trim().split(/\s+/).filter(w => w.length > 0).length;
-            wordCount.textContent = `${words} word${words !== 1 ? 's' : ''}`;
-        }
-
-        async function checkGrammar() {
-            const text = inputText.value;
-            if (!text.trim()) return;
-
-            statusMsg.textContent = "Scanning...";
-            typingStatus.classList.remove('hidden'); 
-            
-            try {
-                const response = await fetch('/api/check', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: text })
-                });
-                
-                const data = await response.json();
-                latestCorrectedText = data.corrected_text;
-                
-                // Toggle Fix All Button
-                if (latestCorrectedText.trim() !== text.trim()) {
-                    fixAllBtn.classList.remove('hidden');
-                    fixAllBtn.classList.add('flex');
-                } else {
-                    fixAllBtn.classList.add('hidden');
-                }
-
-                renderResults(data.tokens);
-                statusMsg.textContent = "Check Complete";
-                typingStatus.classList.add('hidden');
-
-            } catch (err) {
-                console.error(err);
-                statusMsg.textContent = "Connection Error";
-                typingStatus.classList.add('hidden');
+        // Allow clicking background to edit
+        scOutput.onclick = (e) => {
+            if(e.target === scOutput) {
+                scOutput.style.display = 'none';
+                scInput.style.display = 'block';
+                scInput.focus();
+                scTooltip.style.display = 'none';
             }
         }
+        
+        scStatus.innerText = "Check Complete";
+        scLatestCorrectedText = text; // Simplify for demo
+        // document.getElementById('sc-fix-all-btn').style.display = 'inline-block'; // Logic for auto fix
 
-        function renderResults(tokens) {
-            inputText.classList.add('hidden');
-            outputArea.classList.remove('hidden');
-            outputArea.innerHTML = '';
-            isEditMode = false;
+    } catch (e) {
+        console.error(e);
+        scStatus.innerText = "Error checking text";
+    }
+  }
 
-            tokens.forEach(token => {
-                if (token.type === 'error') {
-                    const span = document.createElement('span');
-                    span.textContent = token.word;
-                    span.className = 'error-highlight relative';
-                    span.dataset.suggestions = JSON.stringify(token.suggestions);
-                    
-                    // Stop propagation to prevent immediate closing
-                    span.onclick = (e) => showTooltip(e, span);
-                    outputArea.appendChild(span);
-                } else {
-                    outputArea.appendChild(document.createTextNode(token.word));
-                }
-            });
-            
-            // Allow return to edit mode by clicking empty space
-            outputArea.onclick = (e) => {
-                if (e.target === outputArea) switchToEditMode();
-            };
-        }
+  window.scShowTooltip = (e, element, suggestions, originalWord) => {
+    e.stopPropagation();
+    const rect = element.getBoundingClientRect();
+    scTooltip.style.left = `${rect.left}px`;
+    scTooltip.style.top = `${rect.bottom + 5}px`;
+    scTooltip.style.display = 'block';
+    
+    const content = document.getElementById('sc-tooltip-content');
+    content.innerHTML = '';
 
-        function showTooltip(e, element) {
-            e.stopPropagation();
-            
-            // Positioning Logic
-            const rect = element.getBoundingClientRect();
-            tooltip.style.left = `${rect.left}px`;
-            tooltip.style.top = `${rect.bottom + 10}px`; // slightly lower
-            tooltip.style.display = 'block';
-
-            const suggestions = JSON.parse(element.dataset.suggestions);
-            suggestionList.innerHTML = '';
-            
-            // 1. Suggestions List
-            if (suggestions.length > 0) {
-                suggestions.forEach((sugg, idx) => {
-                    const btn = document.createElement('button');
-                    btn.className = `w-full text-left px-3 py-2 text-sm rounded-md transition-colors flex items-center justify-between group ${
-                        idx === 0 
-                        ? 'bg-teal-50 text-teal-800 font-bold hover:bg-teal-100' 
-                        : 'text-slate-600 hover:bg-slate-50 font-medium'
-                    }`;
-                    
-                    const textSpan = document.createElement('span');
-                    textSpan.className = 'bangla-font';
-                    textSpan.textContent = sugg;
-                    btn.appendChild(textSpan);
-
-                    btn.onclick = () => applyCorrection(element, sugg);
-                    suggestionList.appendChild(btn);
-                });
-            } else {
-                const noSugg = document.createElement('div');
-                noSugg.className = 'px-3 py-2 text-xs text-slate-400 italic';
-                noSugg.textContent = 'No suggestions found';
-                suggestionList.appendChild(noSugg);
-            }
-
-            // 2. Add to Dictionary Button
-            const addBtn = document.createElement('button');
-            addBtn.className = 'w-full text-left px-3 py-2 text-xs text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-md mt-1 border-t border-slate-100 font-medium flex items-center gap-2';
-            addBtn.innerHTML = `
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Add to Dictionary
-            `;
-            addBtn.onclick = () => addToDictionary(element, element.textContent);
-            suggestionList.appendChild(addBtn);
-            
-            // 3. Ignore Option
-            const ignoreBtn = document.createElement('button');
-            ignoreBtn.className = 'w-full text-left px-3 py-2 text-xs text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-md';
-            ignoreBtn.textContent = 'Ignore once';
-            ignoreBtn.onclick = () => {
-                element.classList.remove('error-highlight');
+    if (suggestions && suggestions.length > 0) {
+        suggestions.forEach((sugg, idx) => {
+            const btn = document.createElement('button');
+            btn.className = `sc-sugg-btn ${idx===0 ? 'primary': ''}`;
+            btn.innerText = sugg;
+            btn.onclick = () => {
+                element.innerText = sugg;
+                element.className = '';
                 element.onclick = null;
-                hideTooltip();
+                element.style.color = 'var(--accent)';
+                scHideTooltip();
+                scInput.value = scOutput.innerText; // Sync back
             };
-            suggestionList.appendChild(ignoreBtn);
+            content.appendChild(btn);
+        });
+    } else {
+        content.innerHTML = '<div style="padding:5px; color:var(--text-muted); font-size:10px;">No suggestions</div>';
+    }
 
-            // 4. Edit Manually Option
-            const editBtn = document.createElement('button');
-            editBtn.className = 'w-full text-left px-3 py-2 text-xs text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-md';
-            editBtn.textContent = 'Edit Manually';
-            editBtn.onclick = () => {
-                switchToEditMode();
-                hideTooltip();
-                inputText.focus();
-            };
-            suggestionList.appendChild(editBtn);
-        }
+    // Add to dict button
+    const dictBtn = document.createElement('button');
+    dictBtn.className = 'sc-sugg-btn';
+    dictBtn.style.borderTop = '1px solid var(--border)';
+    dictBtn.style.marginTop = '4px';
+    dictBtn.innerHTML = `<i class="fa-solid fa-plus"></i> Add to Dictionary`;
+    dictBtn.onclick = () => {
+        alert(`Mock: Added "${originalWord}" to dictionary.`);
+        element.className = '';
+        element.onclick = null;
+        scHideTooltip();
+    };
+    content.appendChild(dictBtn);
+  };
 
-        async function addToDictionary(element, word) {
-            try {
-                // Optimistic UI Update
-                const originalText = element.textContent;
-                element.textContent = "Adding...";
-                
-                const response = await fetch('/api/add_word', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ word: word })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    element.textContent = originalText;
-                    element.classList.remove('error-highlight');
-                    element.onclick = null;
-                    
-                    // Success Flash
-                    element.classList.add('text-teal-600', 'font-bold');
-                    setTimeout(() => element.classList.remove('text-teal-600', 'font-bold'), 1500);
-                    
-                    hideTooltip();
-                    statusMsg.textContent = `Added "${word}" to dictionary`;
-                } else {
-                    element.textContent = originalText;
-                    alert("Failed to add word: " + data.error);
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Connection error");
-            }
-        }
+  window.scHideTooltip = () => {
+    scTooltip.style.display = 'none';
+  };
+  
+  // Dictionary Modal Logic
+  window.openDictionaryModal = () => {
+    document.getElementById('dict-modal').classList.add('active');
+    document.getElementById('dict-search-input').value = '';
+    document.getElementById('dict-result').style.display = 'none';
+  };
 
-        function applyCorrection(element, newWord) {
-            element.textContent = newWord;
-            element.classList.remove('error-highlight');
-            element.classList.add('text-teal-600', 'font-medium'); // Success state
-            
-            // Remove success state after animation
-            setTimeout(() => {
-                element.classList.remove('text-teal-600', 'font-medium');
-            }, 1500);
-            
-            element.onclick = null;
-            hideTooltip();
-            updateTextareaFromOutput();
-        }
+  const dictInput = document.getElementById('dict-search-input');
+  let dictTimeout;
+  dictInput.addEventListener('input', () => {
+    clearTimeout(dictTimeout);
+    const word = dictInput.value.trim();
+    if(!word) {
+        document.getElementById('dict-result').style.display = 'none';
+        return;
+    }
+    dictTimeout = setTimeout(() => {
+        // Mock Search
+        document.getElementById('dict-result').style.display = 'block';
+        document.getElementById('dict-status-text').innerText = "Word Not Found";
+        document.getElementById('dict-status-text').style.color = "var(--danger)";
+        document.getElementById('dict-word-display').innerText = word;
+        document.getElementById('dict-add-btn').style.display = 'block';
+    }, 500);
+  });
+  
+  window.scManualAddWord = () => {
+    const word = document.getElementById('dict-word-display').innerText;
+    alert(`Mock: Added ${word}`);
+    closeModals();
+  };
+
+  window.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>seModals(); 
+    renderView();
+  };
+
+  window.handleAdminLogin = () => {
+    const code = document.getElementById('admin-passcode').value;
+    if (code === 'admin123' || code === 'borno') { 
+      isAdmin = true;
+      isContributor = false;
+      
+      const dot = document.getElementById('admin-dot');
+      dot.classList.add('active');
+      dot.style.background = 'var(--accent)';
+      dot.style.boxShadow = '0 0 5px var(--accent)';
+      
+      document.getElementById('admin-text').innerText = 'Admin Mode';
+      document.getElementById('admin-text').style.color = 'var(--accent)';
+      document.getElementById('login-btn').innerText = 'Logout';
+      document.getElementById('login-btn').onclick = window.handleLogout;
+      
+      document.getElementById('submit-notice').innerText = 'Admin Mode: Entries saved directly to DB.';
+      document.getElementById('submit-notice').style.color = 'var(--accent)';
+      
+      closeModals(); 
+      renderView();
+    } else { 
+      document.getElementById('login-error').innerText = "Invalid Admin Passcode.";
+      document.getElementById('login-error').style.display = 'block'; 
+    }
+  };
+
+  window.handleLogout = () => {
+    isAdmin = false;
+    isContributor = false;
+    contributorData = { name: '', email: '' };
+    
+    const dot = document.getElementById('admin-dot');
+    dot.classList.remove('active');
+    dot.style.background = 'var(--text-muted)';
+    dot.style.boxShadow = 'none';
+    
+    document.getElementById('admin-text').innerText = 'Guest Mode';
+    document.getElementById('admin-text').style.color = 'var(--text-secondary)';
+    document.getElementById('login-btn').innerText = 'Login / Register';
+    document.getElementById('login-btn').onclick = window.openLoginModal;
+    
+    document.getElementById('submit-notice').innerText = 'Please log in to submit entries.';
+    document.getElementById('submit-notice').style.color = 'var(--danger)';
+    
+    // Clear inputs
+    document.getElementById('auth-name').value = '';
+    document.getElementById('auth-email').value = '';
+    document.getElementById('admin-passcode').value = '';
+    
+    renderView();
+  };
+
+  window.approveRequest = async (id) => {
+    if (!isAdmin) return;
+    const req = data.requests.find(r => r.id === id);
+    if (!req) return;
+    try {
+      if (isDemoMode) {
+        req.data.id = Date.now().toString();
+        req.type === 'word' ? data.words.push(req.data) : data.sentences.push(req.data);
+        data.requests = data.requests.filter(r => r.id !== id);
+        renderAll();
+      } else {
+        const targetCol = req.type === 'word' ? 'words' : 'sentences';
+        const targetRef = collection(db, 'artifacts', getAppId(), 'users', currentUser.uid, targetCol);
+        await addDoc(targetRef, req.data);
+        const reqRef = doc(db, 'artifacts', getAppId(), 'users', currentUser.uid, 'requests', id);
+        await deleteDoc(reqRef);
+      }
+    } catch(e) { console.error(e); }
+  };
+
+  window.rejectRequest = async (id) => {
+    if (!isAdmin) return;
+    try {
+      if (isDemoMode) { data.requests = data.requests.filter(r => r.id !== id); renderAll(); } 
+      else { const reqRef = doc(db, 'artifacts', getAppId(), 'users', currentUser.uid, 'requests', id); await deleteDoc(reqRef); }
+    } catch(e) { console.error(e); }
+  };
+
+  window.deleteItem = async (col, id) => {
+    if (!isAdmin) return;
+    try {
+      if (isDemoMode) { data[col] = data[col].filter(item => item.id !== id); renderAll(); } 
+      else { const ref = doc(db, 'artifacts', getAppId(), 'users', currentUser.uid, col, id); await deleteDoc(ref); }
+    } catch(e) { console.error(e); }
+  };
+
+  function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  // --- SPELL CHECKER LOGIC ---
+  
+  let scTimer;
+  let scLatestCorrectedText = "";
+  const scInput = document.getElementById('sc-input');
+  const scOutput = document.getElementById('sc-output');
+  const scTooltip = document.getElementById('sc-tooltip');
+  const scStatus = document.getElementById('sc-status-msg');
+
+  window.scResetEditor = () => {
+    scInput.value = '';
+    scOutput.innerHTML = '';
+    scOutput.style.display = 'none';
+    scInput.style.display = 'block';
+    scInput.focus();
+    document.getElementById('sc-word-count').innerText = '0 words';
+    scStatus.innerText = 'Ready';
+    document.getElementById('sc-fix-all-btn').style.display = 'none';
+    scLatestCorrectedText = '';
+  };
+
+  window.scCopyText = () => {
+    const text = scInput.style.display === 'none' ? scOutput.innerText : scInput.value;
+    navigator.clipboard.writeText(text);
+    scStatus.innerText = "Copied to clipboard!";
+    setTimeout(() => scStatus.innerText = "Ready", 2000);
+  };
+
+  scInput.addEventListener('input', () => {
+    clearTimeout(scTimer);
+    const words = scInput.value.trim().split(/\s+/).filter(w => w.length > 0).length;
+    document.getElementById('sc-word-count').innerText = `${words} words`;
+    scStatus.innerText = "Typing...";
+    
+    if(scInput.value.trim().length > 0) {
+        scTimer = setTimeout(scCheckGrammar, 1000);
+    } else {
+        scStatus.innerText = "Ready";
+        document.getElementById('sc-fix-all-btn').style.display = 'none';
+    }
+  });
+
+  async function scCheckGrammar() {
+    const text = scInput.value;
+    if (!text.trim()) return;
+    scStatus.innerText = "Analyzing...";
+    
+    // MOCK API CALL for Demo
+    try {
+        // In a real app, fetch('/api/check', ...)
+        // For this demo, we'll simulate a response
+        await new Promise(r => setTimeout(r, 600)); 
         
-        function applyAutoCorrect() {
-            if (latestCorrectedText) {
-                // Flash effect
-                outputArea.style.opacity = '0';
-                setTimeout(() => {
-                    inputText.value = latestCorrectedText;
-                    checkGrammar(); // Re-check to confirm clean state
-                    outputArea.style.opacity = '1';
-                }, 200);
-                fixAllBtn.classList.add('hidden');
+        // Simulate: Find 'bhul' and suggest 'bhalo' logic roughly
+        // Just for demo visualization, let's mark random words if english-ish or simple logic
+        // Or assume the user wants the UI to work. I will implement a dummy response generator.
+        
+        const tokens = text.split(/(\s+)/).map(t => {
+            if (t.trim().length > 3 && Math.random() > 0.7) {
+                return { type: 'error', word: t, suggestions: ['সঠিক', 'শব্দ'] };
             }
-        }
+            return { type: 'text', word: t };
+        });
 
-        function hideTooltip() {
-            tooltip.style.display = 'none';
-        }
-
-        function resetEditor() {
-            inputText.value = '';
-            outputArea.innerHTML = '';
-            latestCorrectedText = '';
-            wordCount.textContent = '0 words';
-            statusMsg.textContent = 'Ready';
-            fixAllBtn.classList.add('hidden');
-            switchToEditMode();
-        }
-
-        function switchToEditMode() {
-            outputArea.classList.add('hidden');
-            inputText.classList.remove('hidden');
-            inputText.focus();
-            isEditMode = true;
-            hideTooltip();
-        }
-
-        function updateTextareaFromOutput() {
-            inputText.value = outputArea.innerText;
-            updateWordCount();
-        }
-
-        function copyText() {
-            const text = isEditMode ? inputText.value : outputArea.innerText;
-            navigator.clipboard.writeText(text);
-            
-            // Visual feedback
-            const originalMsg = statusMsg.textContent;
-            statusMsg.textContent = "Copied to clipboard!";
-            setTimeout(() => statusMsg.textContent = originalMsg, 2000);
-        }
-
-        // Close tooltip on clicking outside
-        document.addEventListener('click', (e) => {
-            const modal = document.getElementById('dictionary-modal');
-            const modalContent = modal.querySelector('.modal-container');
-            
-            // Close tooltip logic
-            if (!tooltip.contains(e.target) && !e.target.classList.contains('error-highlight')) {
-                hideTooltip();
-            }
-
-            // Close modal if clicked outside
-            if (e.target.closest('#dictionary-modal') && !e.target.closest('.modal-container')) {
-                toggleModal('dictionary-modal');
+        // Construct output
+        scInput.style.display = 'none';
+        scOutput.style.display = 'block';
+        scOutput.innerHTML = '';
+        
+        tokens.forEach(token => {
+            if (token.type === 'error') {
+                const span = document.createElement('span');
+                span.textContent = token.word;
+                span.className = 'error-highlight';
+                span.onclick = (e) => scShowTooltip(e, span, token.suggestions, token.word);
+                scOutput.appendChild(span);
+            } else {
+                scOutput.appendChild(document.createTextNode(token.word));
             }
         });
-    </script>
+
+        // Allow clicking background to edit
+        scOutput.onclick = (e) => {
+            if(e.target === scOutput) {
+                scOutput.style.display = 'none';
+                scInput.style.display = 'block';
+                scInput.focus();
+                scTooltip.style.display = 'none';
+            }
+        }
+        
+        scStatus.innerText = "Check Complete";
+        scLatestCorrectedText = text; // Simplify for demo
+        // document.getElementById('sc-fix-all-btn').style.display = 'inline-block'; // Logic for auto fix
+
+    } catch (e) {
+        console.error(e);
+        scStatus.innerText = "Error checking text";
+    }
+  }
+
+  window.scShowTooltip = (e, element, suggestions, originalWord) => {
+    e.stopPropagation();
+    const rect = element.getBoundingClientRect();
+    scTooltip.style.left = `${rect.left}px`;
+    scTooltip.style.top = `${rect.bottom + 5}px`;
+    scTooltip.style.display = 'block';
+    
+    const content = document.getElementById('sc-tooltip-content');
+    content.innerHTML = '';
+
+    if (suggestions && suggestions.length > 0) {
+        suggestions.forEach((sugg, idx) => {
+            const btn = document.createElement('button');
+            btn.className = `sc-sugg-btn ${idx===0 ? 'primary': ''}`;
+            btn.innerText = sugg;
+            btn.onclick = () => {
+                element.innerText = sugg;
+                element.className = '';
+                element.onclick = null;
+                element.style.color = 'var(--accent)';
+                scHideTooltip();
+                scInput.value = scOutput.innerText; // Sync back
+            };
+            content.appendChild(btn);
+        });
+    } else {
+        content.innerHTML = '<div style="padding:5px; color:var(--text-muted); font-size:10px;">No suggestions</div>';
+    }
+
+    // Add to dict button
+    const dictBtn = document.createElement('button');
+    dictBtn.className = 'sc-sugg-btn';
+    dictBtn.style.borderTop = '1px solid var(--border)';
+    dictBtn.style.marginTop = '4px';
+    dictBtn.innerHTML = `<i class="fa-solid fa-plus"></i> Add to Dictionary`;
+    dictBtn.onclick = () => {
+        alert(`Mock: Added "${originalWord}" to dictionary.`);
+        element.className = '';
+        element.onclick = null;
+        scHideTooltip();
+    };
+    content.appendChild(dictBtn);
+  };
+
+  window.scHideTooltip = () => {
+    scTooltip.style.display = 'none';
+  };
+  
+  // Dictionary Modal Logic
+  window.openDictionaryModal = () => {
+    document.getElementById('dict-modal').classList.add('active');
+    document.getElementById('dict-search-input').value = '';
+    document.getElementById('dict-result').style.display = 'none';
+  };
+
+  const dictInput = document.getElementById('dict-search-input');
+  let dictTimeout;
+  dictInput.addEventListener('input', () => {
+    clearTimeout(dictTimeout);
+    const word = dictInput.value.trim();
+    if(!word) {
+        document.getElementById('dict-result').style.display = 'none';
+        return;
+    }
+    dictTimeout = setTimeout(() => {
+        // Mock Search
+        document.getElementById('dict-result').style.display = 'block';
+        document.getElementById('dict-status-text').innerText = "Word Not Found";
+        document.getElementById('dict-status-text').style.color = "var(--danger)";
+        document.getElementById('dict-word-display').innerText = word;
+        document.getElementById('dict-add-btn').style.display = 'block';
+    }, 500);
+  });
+  
+  window.scManualAddWord = () => {
+    const word = document.getElementById('dict-word-display').innerText;
+    alert(`Mock: Added ${word}`);
+    closeModals();
+  };
+
+  window.addEventListener('DOMContentLoaded', initApp);
+</script>
 </body>
 </html>
